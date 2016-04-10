@@ -1517,7 +1517,7 @@ yyreduce:
 
   case 12:
 #line 160 "parser.y" /* yacc.c:1646  */
-    {	
+    {
 		(yyval.func_list).func_list_num = 1;
 		(yyval.func_list).func_arg_type[(yyval.func_list).func_list_num] = (yyvsp[0].num);	//Populating dimension for each function argument.
 //		printf("param_list_2: func_list_num = %d, func_arg_type = %d.\n", $$.func_list_num, $$.func_arg_type[$$.func_list_num]);
@@ -1534,7 +1534,7 @@ yyreduce:
   case 14:
 #line 169 "parser.y" /* yacc.c:1646  */
     {
-		(yyvsp[0].variable)->p->scope = 1; 
+		(yyvsp[0].variable)->p->scope = 1;
 		(yyvsp[0].variable)->p->type = (yyvsp[-1].nt_type);
 		(yyvsp[0].variable)->p->first_time = 0;
 //		printf("param: scope = 1 for ID %s\n", $2->p->id);
@@ -1547,7 +1547,7 @@ yyreduce:
   case 16:
 #line 179 "parser.y" /* yacc.c:1646  */
     {
-		(yyvsp[-1].variable)->p->scope = 1; 
+		(yyvsp[-1].variable)->p->scope = 1;
 		(yyvsp[-1].variable)->p->type = (yyvsp[-2].nt_type);
 		(yyvsp[-1].variable)->p->first_time = 0;
 //		printf("param: scope = 1 for ID %s\n", $2->p->id);
@@ -1775,7 +1775,7 @@ yyreduce:
 
 //	print_func_details($3);
 
-//Argument # check.	
+//Argument # check.
 	if(((yyvsp[-3].variable)->p->arg_num != (yyvsp[-1].func_list).func_list_num) && ((yyvsp[-3].variable)->p->is_lib_func == 0) && ((yyvsp[-3].variable)->p->type == type_func)) {
 		if((yyvsp[-3].variable)->p->arg_num < (yyvsp[-1].func_list).func_list_num)
 			printf("func_call-stmt: too many arguments in function (%s)\n", (yyvsp[-3].variable)->p->id);
@@ -1787,8 +1787,8 @@ yyreduce:
 
 //Scalar or Pointer?
 //	ptr p=lookup($3.name, 1);
-	
-			
+
+
 
 	}
 #line 1795 "parser.tab.c" /* yacc.c:1646  */
@@ -1899,28 +1899,34 @@ yyreduce:
 #line 1900 "parser.tab.c" /* yacc.c:1646  */
     break;
 
+  case 108:
+#line 492 "parser.y" /* yacc.c:1646  */
+    {emit("MINUS22");}
+#line 1906 "parser.tab.c" /* yacc.c:1646  */
+    break;
+
   case 110:
 #line 496 "parser.y" /* yacc.c:1646  */
     {(yyval.func_list) = (yyvsp[0].func_list);}
-#line 1906 "parser.tab.c" /* yacc.c:1646  */
+#line 1912 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 116:
 #line 509 "parser.y" /* yacc.c:1646  */
     {(yyval.func_list).nt_type = (yyvsp[0].con_pt)->con_type;}
-#line 1912 "parser.tab.c" /* yacc.c:1646  */
+#line 1918 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 117:
 #line 512 "parser.y" /* yacc.c:1646  */
     {(yyval.func_list).nt_type = (yyvsp[0].con_pt)->con_type;}
-#line 1918 "parser.tab.c" /* yacc.c:1646  */
+#line 1924 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 118:
 #line 514 "parser.y" /* yacc.c:1646  */
     {(yyval.func_list).nt_type = (yyvsp[0].con_pt)->con_type;}
-#line 1924 "parser.tab.c" /* yacc.c:1646  */
+#line 1930 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 119:
@@ -1929,7 +1935,7 @@ yyreduce:
 	printf("func_call-factor: %s, decl: %d, num: %d\n", (yyvsp[-3].variable)->p->id, (yyvsp[-3].variable)->p->arg_num, (yyvsp[-1].func_list).func_list_num);
 
 	print_func_details((yyvsp[-1].func_list));
-	
+
 	if(((yyvsp[-3].variable)->p->arg_num != (yyvsp[-1].func_list).func_list_num) && ((yyvsp[-3].variable)->p->is_lib_func == 0) && ((yyvsp[-3].variable)->p->type == type_func)) {
 		if((yyvsp[-3].variable)->p->arg_num < (yyvsp[-1].func_list).func_list_num)
 			printf("func_call-factor: too many arguments in function (%s)\n", (yyvsp[-3].variable)->p->id);
@@ -1952,7 +1958,7 @@ yyreduce:
 	(yyval.func_list).nt_type = (yyvsp[-3].variable)->p->return_type;	/*Function return type passed to factor.*/
 	printf("factor: return type of (%s) is: %d\n", (yyvsp[-3].variable)->p->id, (yyval.func_list).nt_type);
 }
-#line 1956 "parser.tab.c" /* yacc.c:1646  */
+#line 1962 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 122:
@@ -1969,30 +1975,30 @@ yyreduce:
 	}
 	tmp_array_dim = 0;		/*Reset global variable*/
 }
-#line 1973 "parser.tab.c" /* yacc.c:1646  */
+#line 1979 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 123:
 #line 561 "parser.y" /* yacc.c:1646  */
     {(yyval.func_list).nt_type = (yyvsp[0].variable)->p->type;}
-#line 1979 "parser.tab.c" /* yacc.c:1646  */
+#line 1985 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 124:
 #line 563 "parser.y" /* yacc.c:1646  */
     {(yyval.func_list).nt_type = (yyvsp[0].variable)->p->type;}
-#line 1985 "parser.tab.c" /* yacc.c:1646  */
+#line 1991 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 125:
 #line 566 "parser.y" /* yacc.c:1646  */
     {
-		(yyval.variable) = (yyvsp[0].variable); 
+		(yyval.variable) = (yyvsp[0].variable);
 //		printf("var_ref: ID: %s\n", $1->p->id);
 		if((yyvsp[0].variable)->p->type == type_undef)
 			printf("ID (%s) undeclared.\n", (yyvsp[0].variable)->p->id);
 	}
-#line 1996 "parser.tab.c" /* yacc.c:1646  */
+#line 2002 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 126:
@@ -2000,25 +2006,25 @@ yyreduce:
     {
 //	printf("var_ref: variable is = %s\n", $1->p->id);
 }
-#line 2004 "parser.tab.c" /* yacc.c:1646  */
+#line 2010 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 128:
 #line 581 "parser.y" /* yacc.c:1646  */
     {
 		tmp_array_dim++;
-					
+
 		if((yyvsp[-1].func_list).nt_type != type_int) {		/*Array dimension check in stmt.*/
 			printf("dim: Array subscript is not an integer.\n");
 //			printf("dim_decl_1: expr = %d\n", $2);
 			error = 1;
 		}
 	}
-#line 2018 "parser.tab.c" /* yacc.c:1646  */
+#line 2024 "parser.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 2022 "parser.tab.c" /* yacc.c:1646  */
+#line 2028 "parser.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2275,6 +2281,26 @@ yyerror (char *mesg)
       printf("%s\n", mesg);
       exit(1);
   }
+  emit (char *mesg)
+    {
+        /*printf("%s\t%d\t%s\t%s\n", "Error found in Line ", linenumber, "next token: ", yytext );*/
+        /*printf("%s\n", mesg);
+        */
+
+        FILE *f = fopen("file.txt", "w");
+        if (f == NULL)
+        {
+            printf("Error opening file!\n");
+            exit(1);
+        }
+
+
+        fprintf(f, "%s\n", mesg);
+
+
+
+        fclose(f);
+    }
 
 void copy_func_details(struct var_type *v, struct f_l q) {
 	int i;
@@ -2318,6 +2344,3 @@ void check_func_details(struct var_type *v, struct f_l q) {
 		}
 	}
 }
-
-
-

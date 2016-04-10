@@ -41,45 +41,45 @@ struct f_l{	//To get details of function arguments.
 
 %token <variable> ID
 %token <con_pt> CONST
-%token VOID    
-%token INT     
-%token FLOAT   
-%token IF      
-%token ELSE    
-%token WHILE   
+%token VOID
+%token INT
+%token FLOAT
+%token IF
+%token ELSE
+%token WHILE
 %token FOR
-%token STRUCT  
-%token TYPEDEF 
-%token OP_ASSIGN  
-%token OP_OR   
-%token OP_AND  
-%token OP_NOT  
-%token OP_EQ   
-%token OP_NE   
-%token OP_GT   
-%token OP_LT   
-%token OP_GE   
-%token OP_LE   
-%token OP_PLUS 
-%token OP_MINUS        
-%token OP_TIMES        
-%token OP_DIVIDE       
-%token MK_LB 
-%token MK_RB 
-%token MK_LPAREN       
-%token MK_RPAREN       
-%token MK_LBRACE       
-%token MK_RBRACE       
-%token MK_COMMA        
-%token MK_SEMICOLON    
-%token MK_DOT  
+%token STRUCT
+%token TYPEDEF
+%token OP_ASSIGN
+%token OP_OR
+%token OP_AND
+%token OP_NOT
+%token OP_EQ
+%token OP_NE
+%token OP_GT
+%token OP_LT
+%token OP_GE
+%token OP_LE
+%token OP_PLUS
+%token OP_MINUS
+%token OP_TIMES
+%token OP_DIVIDE
+%token MK_LB
+%token MK_RB
+%token MK_LPAREN
+%token MK_RPAREN
+%token MK_LBRACE
+%token MK_RBRACE
+%token MK_COMMA
+%token MK_SEMICOLON
+%token MK_DOT
 %token ERROR
 %token RETURN
 
-%type <num> dim_fn dimfn1 param 
+%type <num> dim_fn dimfn1 param
 %type <func_list> param_list
 %type <func_list> relop_expr_list nonempty_relop_expr_list relop_expr relop_term relop_factor
-%type <func_list> expr term factor dim_decl cexpr mcexpr cfactor 
+%type <func_list> expr term factor dim_decl cexpr mcexpr cfactor
 %type <nt_type> type
 //%type <nt_type> relop_expr_list nonempty_relop_expr_list relop_expr relop_term relop_factor
 //%type <nt_type> expr term factor dim_decl cexpr mcexpr cfactor type
@@ -150,14 +150,14 @@ function_decl	: type ID MK_LPAREN param_list MK_RPAREN MK_LBRACE {cur_scope++;} 
 	}
 		;
 
-param_list	: param_list MK_COMMA param 
+param_list	: param_list MK_COMMA param
 	{
 		$$.func_list_num = $1.func_list_num + 1;
 		$$.func_arg_type[$$.func_list_num] = $3;	//Populating dimension for each function argument.
 //		printf("param_list_1: func_list_num = %d, func_arg_type = %d.\n", $$.func_list_num, $$.func_arg_type[$$.func_list_num]);
 	}
-		| param	
-	{	
+		| param
+	{
 		$$.func_list_num = 1;
 		$$.func_arg_type[$$.func_list_num] = $1;	//Populating dimension for each function argument.
 //		printf("param_list_2: func_list_num = %d, func_arg_type = %d.\n", $$.func_list_num, $$.func_arg_type[$$.func_list_num]);
@@ -165,9 +165,9 @@ param_list	: param_list MK_COMMA param
 		| {$$.func_list_num = 0;}		/*To avoid two productions for function decl and defn.*/
 		;
 
-param		: type ID 
+param		: type ID
 	{
-		$2->p->scope = 1; 
+		$2->p->scope = 1;
 		$2->p->type = $1;
 		$2->p->first_time = 0;
 //		printf("param: scope = 1 for ID %s\n", $2->p->id);
@@ -177,14 +177,14 @@ param		: type ID
 		| struct_type ID
 		| type ID dim_fn
 	{
-		$2->p->scope = 1; 
+		$2->p->scope = 1;
 		$2->p->type = $1;
 		$2->p->first_time = 0;
 //		printf("param: scope = 1 for ID %s\n", $2->p->id);
 		$$ = $3;		//Passing on array dimensions.
 //		printf("param: scope = 1 for ID %s, array_dim = %d.\n", $2->p->id, $$);
 	}
-		| struct_type ID dim_fn 
+		| struct_type ID dim_fn
 		;
 dim_fn		:MK_LB expr_null MK_RB dimfn1 {$$ = $4 + 1;}
 		;
@@ -195,12 +195,12 @@ expr_null	:expr
 		|
 		;
 
-block           : decl_list stmt_list 
+block           : decl_list stmt_list
                 | stmt_list
                 | decl_list
                 |
                 ;
- 
+
 decl_list	: decl_list decl
 		| decl
 		;
@@ -217,7 +217,7 @@ type_decl 	: TYPEDEF type id_list MK_SEMICOLON
 
 var_decl	: type init_id_list MK_SEMICOLON
 		/*Struct?*/
-		| struct_type id_list MK_SEMICOLON  
+		| struct_type id_list MK_SEMICOLON
 		/*Typedef?*/
 		| ID id_list MK_SEMICOLON
 		;
@@ -279,7 +279,7 @@ dim_decl	: MK_LB cexpr MK_RB
 		;
 cexpr		: cexpr add_op mcexpr
 		| mcexpr {$$.nt_type = $1.nt_type;}
-		;  
+		;
 mcexpr		: mcexpr mul_op cfactor
 		| cfactor {$$.nt_type = $1.nt_type;}
 		;
@@ -291,7 +291,7 @@ init_id_list	: init_id
 		| init_id_list MK_COMMA init_id
 		;
 
-init_id		: ID    
+init_id		: ID
 	{
 		if($1->p->first_time==0) {
                 	printf("ID (%s) redeclared\n",$1->p->id);
@@ -363,19 +363,19 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 /*Vineeth: Addition for stmt like while(), if() etc.*/
 		/* | While Statement here */
 		| WHILE MK_LPAREN relop_expr_list MK_RPAREN stmt
-	        | FOR MK_LPAREN assign_expr_list MK_SEMICOLON relop_expr_list MK_SEMICOLON assign_expr_list MK_RPAREN stmt 
-		/* | If then else here */ 
+	        | FOR MK_LPAREN assign_expr_list MK_SEMICOLON relop_expr_list MK_SEMICOLON assign_expr_list MK_RPAREN stmt
+		/* | If then else here */
 		| IF MK_LPAREN relop_expr MK_RPAREN stmt ELSE stmt
-		/* | If statement here */ 
-		| IF MK_LPAREN relop_expr MK_RPAREN stmt 
-		/* | read and write library calls -- note that read/write are not keywords */ 
+		/* | If statement here */
+		| IF MK_LPAREN relop_expr MK_RPAREN stmt
+		/* | read and write library calls -- note that read/write are not keywords */
 		| ID MK_LPAREN relop_expr_list MK_RPAREN	/*Function calls: need to check parameter number, type and return types.*/
 	{
 	printf("func_call-stmt: %s, decl: %d, num: %d\n", $1->p->id, $1->p->arg_num, $3.func_list_num);
 
 //	print_func_details($3);
 
-//Argument # check.	
+//Argument # check.
 	if(($1->p->arg_num != $3.func_list_num) && ($1->p->is_lib_func == 0) && ($1->p->type == type_func)) {
 		if($1->p->arg_num < $3.func_list_num)
 			printf("func_call-stmt: too many arguments in function (%s)\n", $1->p->id);
@@ -387,8 +387,8 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 
 //Scalar or Pointer?
 //	ptr p=lookup($3.name, 1);
-	
-			
+
+
 
 	}
 		| var_ref OP_ASSIGN relop_expr MK_SEMICOLON
@@ -423,7 +423,7 @@ nonempty_assign_expr_list        : nonempty_assign_expr_list MK_COMMA assign_exp
 assign_expr     : ID OP_ASSIGN relop_expr
                 | relop_expr
 
-relop_expr	: relop_term  
+relop_expr	: relop_term
 	{
 		$$ = $1;
 //		printf("relop_expr: array arg # = %d.\n", $$.func_list_num);
@@ -453,7 +453,7 @@ relop_expr_list	: nonempty_relop_expr_list {$$ = $1;}
 		| {$$.func_list_num = 0;}		/*For function parameter number?*/	//PROBLEM???
 		;
 
-nonempty_relop_expr_list	: nonempty_relop_expr_list MK_COMMA relop_expr 
+nonempty_relop_expr_list	: nonempty_relop_expr_list MK_COMMA relop_expr
 	{
 		$$.func_list_num = $1.func_list_num + 1;
 		$$.func_arg_type[$$.func_list_num] = $3.func_list_num;
@@ -471,17 +471,17 @@ nonempty_relop_expr_list	: nonempty_relop_expr_list MK_COMMA relop_expr
 
 */
 	}
-		| relop_expr 
+		| relop_expr
 	{					/*For function parameter number?*/ //PROBLEM???
 		$$.func_list_num = 1;
 		$$.func_arg_type[$$.func_list_num] = $1.func_list_num;
 		strcpy($$.name, $1.name);
 //		printf("nonempty_relop_expr_list_2: name = %s, arg # = %d, array dim# = %d & %d.\n", $$.name, $$.func_list_num, $$.func_arg_type[1], $$.func_arg_type[2]);
-	}	
+	}
 		;
 
 expr		: expr add_op term	//NOTHING TO ADD???
-		| term 
+		| term
 	{
 		$$ = $1;
 //		printf("expr: array arg # = %d.\n", $$.func_list_num);
@@ -489,7 +489,7 @@ expr		: expr add_op term	//NOTHING TO ADD???
 		;
 
 add_op		: OP_PLUS
-		| OP_MINUS
+		| OP_MINUS {emit("MINUS22");}
 		;
 
 term		: term mul_op factor	//NOTHING TO ADD???
@@ -501,24 +501,24 @@ mul_op		: OP_TIMES
 		;
 
 factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
-		/* | -(<relop_expr>) */ 
+		/* | -(<relop_expr>) */
 		| OP_NOT MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 /*Vineeth: OP_MINUS condition added as C could have a condition like:
- 	"if(-(i < 10))".	*/		
+ 	"if(-(i < 10))".	*/
 		| OP_MINUS MK_LPAREN relop_expr MK_RPAREN	/*How to check Array subscript?*/
 		| CONST {$$.nt_type = $1->con_type;}		/*Checking Array subscript.*/
 //	{printf("ID: %d\n", $1->const_u.ival);}
-		/* | - constant, here - is an Unary operator */ 
+		/* | - constant, here - is an Unary operator */
 		| OP_NOT CONST {$$.nt_type = $2->con_type;}	/*Checking Array subscript.*/
 //Vineeth: OP_MINUS condition added as C could have a condition like: "if(-10)".
 		| OP_MINUS CONST {$$.nt_type = $2->con_type;}	/*Checking Array subscript.*/
 		| ID MK_LPAREN relop_expr_list MK_RPAREN
-		/* | - func ( <relop_expr_list> ) */ 
+		/* | - func ( <relop_expr_list> ) */
 {
 	printf("func_call-factor: %s, decl: %d, num: %d\n", $1->p->id, $1->p->arg_num, $3.func_list_num);
 
 	print_func_details($3);
-	
+
 	if(($1->p->arg_num != $3.func_list_num) && ($1->p->is_lib_func == 0) && ($1->p->type == type_func)) {
 		if($1->p->arg_num < $3.func_list_num)
 			printf("func_call-factor: too many arguments in function (%s)\n", $1->p->id);
@@ -544,8 +544,8 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 		| OP_NOT ID MK_LPAREN relop_expr_list MK_RPAREN
 //Vineeth: OP_MINUS condition added as C could have a condition like: "if(-read(i))".
 		| OP_MINUS ID MK_LPAREN relop_expr_list MK_RPAREN
-		| var_ref 			
-		/* | - var-reference */ 
+		| var_ref
+		/* | - var-reference */
 {	$$.nt_type = $1->p->type;			/*Type to be used in array subscript.*/
 	$$.func_list_num = tmp_array_dim;		//# of Dimensions.
 	strcpy($$.name, $1->p->id);
@@ -562,9 +562,9 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 //Vineeth: OP_MINUS condition added as C could have a condition like: "if(-a)".
 		| OP_MINUS var_ref {$$.nt_type = $2->p->type;}		/*Type to be used in array subscript.*/
 		;
-var_ref		: ID 
+var_ref		: ID
 	{
-		$$ = $1; 
+		$$ = $1;
 //		printf("var_ref: ID: %s\n", $1->p->id);
 		if($1->p->type == type_undef)
 			printf("ID (%s) undeclared.\n", $1->p->id);
@@ -580,7 +580,7 @@ var_ref		: ID
 dim		: MK_LB expr MK_RB
 	{
 		tmp_array_dim++;
-					
+
 		if($2.nt_type != type_int) {		/*Array dimension check in stmt.*/
 			printf("dim: Array subscript is not an integer.\n");
 //			printf("dim_decl_1: expr = %d\n", $2);
@@ -619,6 +619,26 @@ yyerror (char *mesg)
       printf("%s\n", mesg);
       exit(1);
   }
+  emit (char *mesg)
+    {
+        /*printf("%s\t%d\t%s\t%s\n", "Error found in Line ", linenumber, "next token: ", yytext );*/
+        /*printf("%s\n", mesg);
+        */
+
+        FILE *f = fopen("file.txt", "w");
+        if (f == NULL)
+        {
+            printf("Error opening file!\n");
+            exit(1);
+        }
+
+
+        fprintf(f, "%s\n", mesg);
+
+
+
+        fclose(f);
+    }
 
 void copy_func_details(struct var_type *v, struct f_l q) {
 	int i;
@@ -662,6 +682,3 @@ void check_func_details(struct var_type *v, struct f_l q) {
 		}
 	}
 }
-
-
-
