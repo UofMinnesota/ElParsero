@@ -1,11 +1,17 @@
-li $const, 20
-li $const, 5
-SUB $const, $const, $const 
-li $const, 100
-li $const, 20
-li $const, 5
-SUB $const, $const, $const 
-li $const, 10
-li $const, 3
-ADD $const, $const, $const 
-li $const, 5
+.text
+li $8, 20
+li $9, 5
+sub $10, $8, $9 
+li $11, 100
+li $12, 20
+mul $13, $0, $12
+li $14, 5
+sub $15, $0, $14 
+li $8, 10
+li $9, 3
+add $10, $0, $9 
+li $11, 5
+div $12, $0, $11
+
+.data
+_globalint: .word 0

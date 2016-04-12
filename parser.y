@@ -11,12 +11,15 @@ static int linenumber = 1;
 int cur_scope = 0;
 int is_nt_func = 0;
 int tmp_array_dim = 0;
+int temp_place = 8;
 enum all_type cur_type, fn_return_type;
+
 struct var_type{
     ptr p;  		//pointer to symbol table entry
 };
 struct const_type{
   int con_type;		/*0: Int, 1: Float, -1: String*/
+  int place;
   union {
     int ival;
     float fval;
@@ -28,6 +31,7 @@ struct f_l{	//To get details of function arguments.
     int func_list_num;
     int func_arg_type[256];
     enum all_type nt_type;
+    int place;
 };
 %}
 
@@ -41,7 +45,6 @@ struct f_l{	//To get details of function arguments.
 
 %token <variable> ID
 %token <con_pt> CONST
-%type <variable> add_op
 %token VOID
 %token INT
 %token FLOAT
@@ -84,7 +87,7 @@ struct f_l{	//To get details of function arguments.
 %type <nt_type> type
 //%type <nt_type> relop_expr_list nonempty_relop_expr_list relop_expr relop_term relop_factor
 //%type <nt_type> expr term factor dim_decl cexpr mcexpr cfactor type
-%type <variable> var_ref
+%type <variable> var_ref mul_op add_op
 
 %start program
 
@@ -94,15 +97,17 @@ struct f_l{	//To get details of function arguments.
 
 /* Productions */               /* Semantic actions */
 program		: global_decl_list
-		;
+
+    ;
 
 global_decl_list: global_decl_list global_decl
                 |
+
 		;
 
 global_decl	: decl_list function_decl
 		| function_decl
-		;
+    ;
 
 /*Vineeth: Scoping rule is not correct!*/
 function_decl	: type ID MK_LPAREN param_list MK_RPAREN MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} MK_RBRACE
@@ -346,7 +351,7 @@ init_id		: ID
 
                 }
                	$1->p->type=cur_type;
-                //printf("%s\n", $1->p->id); //$$ = $1; //miguel
+                //printf("%s\n", $1->p->id); //$$ = $1;
 
 	/*Variable declaration upgraded?*/
 /*
@@ -439,7 +444,7 @@ relop_term	: relop_factor  {$$ = $1;}
 		| relop_term OP_AND relop_factor
 		;
 
-relop_factor	: expr {$$ = $1;}//miguel printf("%d\n", $$);
+relop_factor	: expr {$$ = $1;}
 		| expr rel_op expr
 		;
 
@@ -484,25 +489,26 @@ nonempty_relop_expr_list	: nonempty_relop_expr_list MK_COMMA relop_expr
 	}
 		;
 
-expr		: expr add_op term {char buf[20]; sprintf(buf, "%s $const, $const, $const ", $2);emit(buf);}
+expr		: expr add_op term {char buf[20]; sprintf(buf, "%s $%d, $%d, $%d ", $2, temp_place, $1.place, $3.place);emit(buf); temp_place = 8 + (temp_place + 1) % 8; $1.place = temp_place;}
 		| term
 	{
 		$$ = $1;
-		//printf("expr:%s\n", $$.name); //miguel
+		//printf("expr:%s\n", $$.name);
 
 	}	/*For function return type?*/
 		;
 
-add_op		: OP_PLUS {$$ = "ADD";}
-		| OP_MINUS {$$ = "SUB";}
+add_op		: OP_PLUS {$$ = "add";}
+		| OP_MINUS {$$ = "sub";}
 		;
 
-term		: term mul_op factor	//NOTHING TO ADD???
-		| factor {$$ = $1;}	/*For function return type?*/
-		;
+term		: term mul_op factor {char buf[20]; sprintf(buf, "%s $%d, $%d, $%d", $2, temp_place, $1.place, $3.place);emit(buf);temp_place = 8 + (temp_place + 1) % 8; $1.place = temp_place;}	//
+		| factor //comentei aqui{$$ = $1;}	/*For function return type?*/
+		{$$ = $1;}
+    ;
 
-mul_op		: OP_TIMES
-		| OP_DIVIDE
+mul_op		: OP_TIMES {$$ = "mul";}
+		| OP_DIVIDE {$$ = "div";}
 		;
 
 factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
@@ -511,7 +517,12 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 /*Vineeth: OP_MINUS condition added as C could have a condition like:
  	"if(-(i < 10))".	*/
 		| OP_MINUS MK_LPAREN relop_expr MK_RPAREN	/*How to check Array subscript?*/
-		| CONST {$$.nt_type = $1->con_type;char buf[20]; sprintf(buf, "li $const, %d", $1->const_u.ival);emit(buf);}		/*Checking Array subscript.*/ //miguel
+		| CONST {$$.nt_type = $1->con_type;
+    if($1->place == 0){
+      $1->place = temp_place;
+      temp_place = 8 + (temp_place + 1) % 8;
+    }
+    char buf[20]; sprintf(buf, "li $%d, %d", $1->place, $1->const_u.ival);emit(buf); $$.place = $1->place;}		/*Checking Array subscript.*/ //miguel
 	//{printf("ID: %d\n", $1->const_u.ival);}
 		/* | - constant, here - is an Unary operator */
 		| OP_NOT CONST {$$.nt_type = $2->con_type;}	/*Checking Array subscript.*/
@@ -604,16 +615,36 @@ int main (int argc, char *argv[])
     init_symtab();
     f = fopen("file.txt", "w");
     printf("Symbol Table initialized\n");
+    emit(".text");
     if(argc>0)
         yyin = fopen(argv[1],"r");
     else
         yyin=stdin;
     yyparse();
-    print_symtab();
+    //print_symtab();
     if (error == 1)
 	printf("%s\n", "Parsing completed. Errors found.");
-    else
+    else{
     	printf("%s\n", "Parsing completed. No errors found.");
+      emit("\n.data");
+      char buf[20];
+      ptr p;
+      int i, size = 0;
+      for(i=0;i<TABLESIZE;i++){
+          p=symtab[i];
+          while(p!=NULL){
+              if(p->type == type_int){
+                size = 0;
+              }
+              if(p->type != type_func){
+                sprintf(buf, "_%s: .word %d", p->id, size);
+                emit(buf);
+              }
+              p=p->next;
+          }
+      }
+
+    }
 //    print_symtab();
     cleanup_symtab(-1); //clean up the entire symbol table
     fclose(f);
