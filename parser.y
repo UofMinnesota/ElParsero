@@ -686,9 +686,7 @@ int main (int argc, char *argv[])
       for(i=0;i<TABLESIZE;i++){
           p=symtab[i];
           while(p!=NULL){
-              if(p->type == type_int){
-                size = 0;
-              }
+              
               if(p->type != type_func){
                 sprintf(buf, "_%s: .word %d", p->id, size);
                 emit(buf);
