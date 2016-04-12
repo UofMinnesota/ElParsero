@@ -1,17 +1,61 @@
 .text
+main:
+sw $ra, 0($sp)
+sw $fp, -4($sp)
+add $fp, $sp, -4
+add $sp, $sp, -8
+lw $2, _framesize_main
+sub $sp, $sp, $2
+sw $8, 32($sp)
+sw $9, 28($sp)
+sw $10, 24($sp)
+sw $11, 20($sp)
+sw $12, 16($sp)
+sw $13, 12($sp)
+sw $14, 8($sp)
+sw $15, 4($sp)
+
+_begin_main:
 li $8, 20
 li $9, 5
 sub $10, $8, $9 
+sw $10, 10
 li $11, 100
+sw $11, 11
+lw $globalint, globalint
 li $12, 20
 mul $13, $0, $12
 li $14, 5
 sub $15, $0, $14 
+sw $15, 15
 li $8, 10
+sw $8, 8
+lw $a, a
 li $9, 3
 add $10, $0, $9 
+sw $10, 10
+lw $localint, localint
 li $11, 5
 div $12, $0, $11
+sw $0, 0
+
+
+	_end_main:
+	lw $8, 32($sp)
+	lw $9, 28($sp)
+	lw $10, 24($sp)
+	lw $11, 20($sp)
+	lw $12, 16($sp)
+	lw $13, 12($sp)
+	lw $14, 8($sp)
+	lw $15, 4($sp)
+	lw $ra, 4($fp)
+	add $sp, $fp, 4
+	lw $fp, 0($fp)
+	li $v0, 10
+	syscall
+
 
 .data
 _globalint: .word 0
+_framesize_main: .word 36

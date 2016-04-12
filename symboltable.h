@@ -2,6 +2,7 @@ enum all_type {type_undef,type_int,type_float,type_void,type_def,type_func,type_
 
 struct node{			/* Structure for Identifiers */
     char id[257];
+
     char struct_name[257];
     int freq,   		//freq of the variable
         scope,  		//scope of the variable
@@ -11,6 +12,7 @@ struct node{			/* Structure for Identifiers */
 	is_lib_func,		/*Temp solution to handle main(), read(), fread() & write().*/
 	is_array,
 	array_dim;		/*Array dimension count.*/
+  int place;
     int func_dim_list[256];	//To store function dimension details.
     enum all_type return_type;	/*Return type of the function*/
     enum all_type type; 	//enumerated type of the variable
@@ -42,5 +44,3 @@ void init_comtab();
 void insert_comment(char *comment);
 void print_comtab();
 void cleanup_comtab();
-
-

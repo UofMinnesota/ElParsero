@@ -342,6 +342,7 @@ init_id		: ID
 	}
 		| ID OP_ASSIGN relop_expr
 	{
+  char buf[20]; sprintf(buf, "sw $%d, %d", $3.place, $3.place);emit(buf);
                 if($1->p->first_time==0) {
                  	printf("ID (%s) redeclared\n",$1->p->id);
 			error = 1;
@@ -402,6 +403,7 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 	}
 		| var_ref OP_ASSIGN relop_expr MK_SEMICOLON
 	{				/*Function return type comparison goes here?*/
+  char buf[20]; sprintf(buf, "sw $%d, %d", $3.place, $3.place);emit(buf);
 //		printf("stmt: ID = %s, type = %d, return_type = %d\n", $1->p->id, $1->p->type, $3);
 		if($1->p->type != $3.nt_type && (is_nt_func == 1)) {
 			printf("ID = %s : Incompatible return types\n", $1->p->id);
@@ -489,7 +491,7 @@ nonempty_relop_expr_list	: nonempty_relop_expr_list MK_COMMA relop_expr
 	}
 		;
 
-expr		: expr add_op term {char buf[20]; sprintf(buf, "%s $%d, $%d, $%d ", $2, temp_place, $1.place, $3.place);emit(buf); temp_place = 8 + (temp_place + 1) % 8; $1.place = temp_place;}
+expr		: expr add_op term {char buf[20]; sprintf(buf, "%s $%d, $%d, $%d ", $2, temp_place, $1.place, $3.place);emit(buf); $$.place = temp_place; temp_place = 8 + (temp_place + 1) % 8; $1.place = temp_place;}
 		| term
 	{
 		$$ = $1;
@@ -562,7 +564,8 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 		| OP_MINUS ID MK_LPAREN relop_expr_list MK_RPAREN
 		| var_ref
 		/* | - var-reference */
-{	$$.nt_type = $1->p->type;			/*Type to be used in array subscript.*/
+{char buf[20]; sprintf(buf, "lw $%s, %s", $1->p->id, $1->p->id);emit(buf);
+$$.nt_type = $1->p->type;			/*Type to be used in array subscript.*/
 	$$.func_list_num = tmp_array_dim;		//# of Dimensions.
 	strcpy($$.name, $1->p->id);
 //	printf("factor-var_ref: variable is = %s, tmp_array_dim = %d.\n", $1->p->id, tmp_array_dim);
@@ -580,6 +583,7 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 		;
 var_ref		: ID
 	{
+
 		$$ = $1;
 //		printf("var_ref: ID: %s\n", $1->p->id);
 		if($1->p->type == type_undef)
@@ -610,6 +614,53 @@ struct_tail	: MK_DOT ID
 %%
 #include "lex.yy.c"
 FILE *f;
+
+void generateMain()
+{
+char buf[2000];
+sprintf(buf, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s","main:",
+	"sw $ra, 0($sp)",
+	"sw $fp, -4($sp)",
+	"add $fp, $sp, -4",
+	"add $sp, $sp, -8",
+	"lw $2, _framesize_main",
+	"sub $sp, $sp, $2",
+	"sw $8, 32($sp)",
+	"sw $9, 28($sp)",
+	"sw $10, 24($sp)",
+	"sw $11, 20($sp)",
+	"sw $12, 16($sp)",
+	"sw $13, 12($sp)",
+	"sw $14, 8($sp)",
+	"sw $15, 4($sp)",
+  "_begin_main:"
+);
+emit(buf);
+}
+
+void endMain()
+{
+char buf[2000];
+sprintf(buf, "\n\n\t%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+"_end_main:\n",
+"	lw $8, 32($sp)\n",
+"	lw $9, 28($sp)\n",
+"	lw $10, 24($sp)\n",
+"	lw $11, 20($sp)\n",
+"	lw $12, 16($sp)\n",
+"	lw $13, 12($sp)\n",
+"	lw $14, 8($sp)\n",
+"	lw $15, 4($sp)\n",
+"	lw $ra, 4($fp)\n",
+"	add $sp, $fp, 4\n",
+"	lw $fp, 0($fp)\n",
+"	li $v0, 10\n",
+"	syscall\n"
+
+);
+emit(buf);
+}
+
 int main (int argc, char *argv[])
 {
     init_symtab();
@@ -620,7 +671,9 @@ int main (int argc, char *argv[])
         yyin = fopen(argv[1],"r");
     else
         yyin=stdin;
+    generateMain();
     yyparse();
+    endMain();
     //print_symtab();
     if (error == 1)
 	printf("%s\n", "Parsing completed. Errors found.");
@@ -643,10 +696,13 @@ int main (int argc, char *argv[])
               p=p->next;
           }
       }
+      sprintf(buf, "_framesize_main: .word 36", 2, 2);
+      emit(buf);
 
     }
 //    print_symtab();
     cleanup_symtab(-1); //clean up the entire symbol table
+
     fclose(f);
     return 0;
 } /* main */
