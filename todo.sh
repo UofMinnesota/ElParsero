@@ -1,3 +1,3 @@
 make clean
 make
-./parser test.c
+./parser test1.c

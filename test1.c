@@ -11,11 +11,11 @@ void main()
 
   globalint = 100;
   localint = globalint * 20 - 5;
-  
+
   a = 10;
   a = a - 3;  /* error 2, undeclear b */
 
   g = localint / 5;
-  
+
   return;
 }

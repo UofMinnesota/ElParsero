@@ -340,9 +340,12 @@ init_id		: ID
                  	printf("ID (%s) redeclared\n",$1->p->id);
 			error = 1;
 		}
-               	else  //ID being seen for the first time
+               	else{  //ID being seen for the first time
                 	$1->p->first_time=0;
+
+                }
                	$1->p->type=cur_type;
+                //printf("%s\n", $1->p->id); //$$ = $1; //miguel
 
 	/*Variable declaration upgraded?*/
 /*
@@ -435,7 +438,7 @@ relop_term	: relop_factor  {$$ = $1;}
 		| relop_term OP_AND relop_factor
 		;
 
-relop_factor	: expr {$$ = $1;}
+relop_factor	: expr {$$ = $1;}//miguel printf("%d\n", $$);
 		| expr rel_op expr
 		;
 
@@ -480,16 +483,18 @@ nonempty_relop_expr_list	: nonempty_relop_expr_list MK_COMMA relop_expr
 	}
 		;
 
-expr		: expr add_op term	//NOTHING TO ADD???
+expr		: expr add_op term //
 		| term
 	{
 		$$ = $1;
-//		printf("expr: array arg # = %d.\n", $$.func_list_num);
+		//printf("expr:%s\n", $$.name); //miguel
+
 	}	/*For function return type?*/
 		;
 
 add_op		: OP_PLUS
 		| OP_MINUS {/*emit("MINUS22");*/}
+    //{$$ = $1;}
 		;
 
 term		: term mul_op factor	//NOTHING TO ADD???
@@ -506,8 +511,8 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 /*Vineeth: OP_MINUS condition added as C could have a condition like:
  	"if(-(i < 10))".	*/
 		| OP_MINUS MK_LPAREN relop_expr MK_RPAREN	/*How to check Array subscript?*/
-		| CONST {$$.nt_type = $1->con_type;}		/*Checking Array subscript.*/
-//	{printf("ID: %d\n", $1->const_u.ival);}
+		| CONST {$$.nt_type = $1->con_type;char buf[20]; sprintf(buf, "li $const, %d", $1->const_u.ival);emit(buf);}		/*Checking Array subscript.*/ //miguel
+	//{printf("ID: %d\n", $1->const_u.ival);}
 		/* | - constant, here - is an Unary operator */
 		| OP_NOT CONST {$$.nt_type = $2->con_type;}	/*Checking Array subscript.*/
 //Vineeth: OP_MINUS condition added as C could have a condition like: "if(-10)".
@@ -593,9 +598,11 @@ struct_tail	: MK_DOT ID
 		;
 %%
 #include "lex.yy.c"
+FILE *f;
 int main (int argc, char *argv[])
 {
     init_symtab();
+    f = fopen("file.txt", "w");
     printf("Symbol Table initialized\n");
     if(argc>0)
         yyin = fopen(argv[1],"r");
@@ -609,6 +616,7 @@ int main (int argc, char *argv[])
     	printf("%s\n", "Parsing completed. No errors found.");
 //    print_symtab();
     cleanup_symtab(-1); //clean up the entire symbol table
+    fclose(f);
     return 0;
 } /* main */
 
@@ -625,7 +633,7 @@ yyerror (char *mesg)
         /*printf("%s\n", mesg);
         */
 
-        FILE *f = fopen("file.txt", "w");
+
         if (f == NULL)
         {
             printf("Error opening file!\n");
@@ -635,9 +643,6 @@ yyerror (char *mesg)
 
         fprintf(f, "%s\n", mesg);
 
-
-
-        fclose(f);
     }
 
 void copy_func_details(struct var_type *v, struct f_l q) {
