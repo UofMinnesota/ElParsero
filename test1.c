@@ -13,7 +13,7 @@ void main()
   localint = globalint * 20 - 5;
 
   a = 10;
-  a = a - 3;  /* error 2, undeclear b */
+  a = a + 3;  /* error 2, undeclear b */
 
   g = localint / 5;
 

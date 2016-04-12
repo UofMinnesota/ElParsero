@@ -1,8 +1,11 @@
 li $const, 20
 li $const, 5
+SUB $const, $const, $const 
 li $const, 100
 li $const, 20
 li $const, 5
+SUB $const, $const, $const 
 li $const, 10
 li $const, 3
+ADD $const, $const, $const 
 li $const, 5

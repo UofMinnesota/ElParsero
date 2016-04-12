@@ -41,6 +41,7 @@ struct f_l{	//To get details of function arguments.
 
 %token <variable> ID
 %token <con_pt> CONST
+%type <variable> add_op
 %token VOID
 %token INT
 %token FLOAT
@@ -483,7 +484,7 @@ nonempty_relop_expr_list	: nonempty_relop_expr_list MK_COMMA relop_expr
 	}
 		;
 
-expr		: expr add_op term //
+expr		: expr add_op term {char buf[20]; sprintf(buf, "%s $const, $const, $const ", $2);emit(buf);}
 		| term
 	{
 		$$ = $1;
@@ -492,9 +493,8 @@ expr		: expr add_op term //
 	}	/*For function return type?*/
 		;
 
-add_op		: OP_PLUS
-		| OP_MINUS {/*emit("MINUS22");*/}
-    //{$$ = $1;}
+add_op		: OP_PLUS {$$ = "ADD";}
+		| OP_MINUS {$$ = "SUB";}
 		;
 
 term		: term mul_op factor	//NOTHING TO ADD???
