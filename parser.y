@@ -342,7 +342,8 @@ init_id		: ID
 	}
 		| ID OP_ASSIGN relop_expr
 	{
-  char buf[20]; sprintf(buf, "sw $%d, %d", $3.place, $3.place);emit(buf);
+  printf("%s ------\n" , $1->p->id);
+  char buf[20]; sprintf(buf, "sw $%d, %s", $3.place, $3.name);emit(buf);
                 if($1->p->first_time==0) {
                  	printf("ID (%s) redeclared\n",$1->p->id);
 			error = 1;
@@ -403,7 +404,7 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 	}
 		| var_ref OP_ASSIGN relop_expr MK_SEMICOLON
 	{				/*Function return type comparison goes here?*/
-  char buf[20]; sprintf(buf, "sw $%d, %d", $3.place, $3.place);emit(buf);
+  char buf[20]; sprintf(buf, "sw $%d, %s", $3.place, $1->p->id);emit(buf);
 //		printf("stmt: ID = %s, type = %d, return_type = %d\n", $1->p->id, $1->p->type, $3);
 		if($1->p->type != $3.nt_type && (is_nt_func == 1)) {
 			printf("ID = %s : Incompatible return types\n", $1->p->id);
@@ -436,17 +437,18 @@ assign_expr     : ID OP_ASSIGN relop_expr
 
 relop_expr	: relop_term
 	{
-		$$ = $1;
+		$$ = $1;strcpy($$.name, $1.name);;
 //		printf("relop_expr: array arg # = %d.\n", $$.func_list_num);
+printf("%s\n" , $1.name);
 	}
 		| relop_expr OP_OR relop_term
 		;
 
-relop_term	: relop_factor  {$$ = $1;}
+relop_term	: relop_factor  {$$ = $1;strcpy($$.name, $1.name);printf("%s\n" , $1.name);}
 		| relop_term OP_AND relop_factor
 		;
 
-relop_factor	: expr {$$ = $1;}
+relop_factor	: expr {$$ = $1;strcpy($$.name, $1.name);printf("%s\n" , $1.name);}
 		| expr rel_op expr
 		;
 
@@ -494,6 +496,7 @@ nonempty_relop_expr_list	: nonempty_relop_expr_list MK_COMMA relop_expr
 expr		: expr add_op term {char buf[20]; sprintf(buf, "%s $%d, $%d, $%d ", $2, temp_place, $1.place, $3.place);emit(buf); $$.place = temp_place; temp_place = 8 + (temp_place + 1) % 8; $1.place = temp_place;}
 		| term
 	{
+
 		$$ = $1;
 		//printf("expr:%s\n", $$.name);
 
@@ -686,7 +689,7 @@ int main (int argc, char *argv[])
       for(i=0;i<TABLESIZE;i++){
           p=symtab[i];
           while(p!=NULL){
-              
+
               if(p->type != type_func){
                 sprintf(buf, "_%s: .word %d", p->id, size);
                 emit(buf);

@@ -1,7 +1,7 @@
 /* TestCase 1: Variable Declarations */
 
 int globalint;
-
+int globalinto;
 
 void main()
 {
@@ -10,7 +10,7 @@ void main()
   int localint2 = 20 - 5; /* error 1, redeclear localint */
 
   globalint = 100;
-  localint = globalint * 20 - 5;
+  localint = globalinto * 20 - 5;
 
   a = 10;
   a = a + 3;  /* error 2, undeclear b */
