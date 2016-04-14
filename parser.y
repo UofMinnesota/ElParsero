@@ -342,7 +342,7 @@ init_id		: ID
 	}
 		| ID OP_ASSIGN relop_expr
 	{
-  printf("%s ------\n" , $1->p->id);
+  //printf("%s ------\n" , $1->p->id);
   char buf[20]; sprintf(buf, "sw $%d, %s", $3.place, $3.name);emit(buf);
                 if($1->p->first_time==0) {
                  	printf("ID (%s) redeclared\n",$1->p->id);
@@ -350,7 +350,7 @@ init_id		: ID
 		}
                	else{  //ID being seen for the first time
                 	$1->p->first_time=0;
-
+                  //miguel register
                 }
                	$1->p->type=cur_type;
                 //printf("%s\n", $1->p->id); //$$ = $1;
@@ -644,7 +644,7 @@ emit(buf);
 void endMain()
 {
 char buf[2000];
-sprintf(buf, "\n\n\t%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+sprintf(buf, "\n\n%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
 "_end_main:\n",
 "	lw $8, 32($sp)\n",
 "	lw $9, 28($sp)\n",
@@ -685,13 +685,13 @@ int main (int argc, char *argv[])
       emit("\n.data");
       char buf[20];
       ptr p;
-      int i, size = 0;
+      int i, value = 0;
       for(i=0;i<TABLESIZE;i++){
           p=symtab[i];
           while(p!=NULL){
 
-              if(p->type != type_func){
-                sprintf(buf, "_%s: .word %d", p->id, size);
+              if(p->type == type_int){
+                sprintf(buf, "_%s: .word %d", p->id, value);
                 emit(buf);
               }
               p=p->next;

@@ -19,7 +19,7 @@ _begin_main:
 li $8, 20
 li $9, 5
 sub $10, $8, $9 
-sw $10, À%Ì
+sw $10, °±Ë
 li $11, 100
 sw $11, globalint
 lw $globalinto, globalinto
@@ -40,7 +40,7 @@ div $12, $0, $11
 sw $0, g
 
 
-	_end_main:
+_end_main:
 	lw $8, 32($sp)
 	lw $9, 28($sp)
 	lw $10, 24($sp)

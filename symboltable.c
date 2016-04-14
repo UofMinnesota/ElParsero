@@ -4,7 +4,46 @@
 #include<ctype.h>
 #include "symboltable.h"
 
+int find_inRegister(char name[]){
+  regist aux = reg;
+  while(aux != NULL){
+    if(!strcmp(aux->name, name)){
+      return aux->place;
+    }
+    aux = aux->next;
+  }
 
+  return 0;
+}
+
+int insert_inRegister(char name[]){
+  int place = 0;
+  if(place = find_inRegister(name[])){    //if find the name in the register
+      return place; //return place
+  }
+  else{
+      regist aux = reg;
+
+      while(aux!=NULL){
+          aux=aux->next;
+      }
+      ptr tmp;
+      tmp=(ptr)malloc(sizeof(struct node));
+      strcpy(tmp->id,text);
+      if(p==symtab[val]){
+          q=getnode(text);
+          q->next=p;
+          symtab[val]=q;
+          return symtab[val];
+      }
+      else{   //insert the new node between q and p
+          q->next=getnode(text);
+          q->scope=cur_scope;
+          (q->next)->next=p;
+          return q->next;
+      }
+  }
+}
 
 int hash(char *key) /*Hash function */
 {
