@@ -8,11 +8,13 @@ struct node{			/* Structure for Identifiers */
         scope,  		//scope of the variable
         is_typedef, 		//true if the ID is a typedef name, not a variable
         first_time, 		//to differentiate between decl and subsequent use
-    	arg_num,		/*# of Arguments in the function*/
+stkPos,
+      arg_num,		/*# of Arguments in the function*/
 	is_lib_func,		/*Temp solution to handle main(), read(), fread() & write().*/
 	is_array,
 	array_dim;		/*Array dimension count.*/
   int place;
+
     int func_dim_list[256];	//To store function dimension details.
     enum all_type return_type;	/*Return type of the function*/
     enum all_type type; 	//enumerated type of the variable

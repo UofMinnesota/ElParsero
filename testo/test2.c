@@ -17,9 +17,38 @@ float add (float a, float b)
   return result;
 }
 
+void essaBuceta()
+{
+  int localint, a;
+  int g;
+  int localint2 = 20 - 5; /* error 1, redeclear localint */
+  int xis = 23;
+  int pexe = 910;
+  int fudeu = 90;
+  int jaja = 321;
+  int kkk = 666;
+	int xi2s = 23;
+	int pexe2 = 910;
+	int fudeu2 = 90;
+	int jaj3a = 321;
+	int kk3k = 666;
+	int s3k = 32;
+	int jeje = 3232;
+	float aheu = 32;
+  localint = 100;
+  localint = localint * 20 - 5;
+
+  a = 10;
+  a = a + 3;  /* error 2, undeclear b */
+
+  g = localint / 5;
+
+  return;
+}
+
 int main()
 {
-  
+
   float a, b, c, result0;
   int result;
   adde();

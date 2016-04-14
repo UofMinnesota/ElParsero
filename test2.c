@@ -6,6 +6,9 @@ float add (float a, float b)
   return result;
 }
 
+
+
+
 int main()
 {
   float a, b, c, result0;
