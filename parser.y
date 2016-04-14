@@ -12,6 +12,7 @@ int cur_scope = 0;
 int is_nt_func = 0;
 int tmp_array_dim = 0;
 int temp_place = 8;
+int fp_pos = 0;
 enum all_type cur_type, fn_return_type;
 
 struct var_type{
@@ -88,6 +89,7 @@ struct f_l{	//To get details of function arguments.
 //%type <nt_type> relop_expr_list nonempty_relop_expr_list relop_expr relop_term relop_factor
 //%type <nt_type> expr term factor dim_decl cexpr mcexpr cfactor type
 %type <variable> var_ref mul_op add_op
+%type <variable> init_id
 
 %start program
 
@@ -304,7 +306,11 @@ init_id		: ID
 			error = 1;
 		}
                 else  {//ID being seen for the first time
+                fp_pos -= 4;
+                $1->p->stkPos = fp_pos;
                       	$1->p->first_time=0;
+                        $$ = $1;
+
 //			printf("init_id_1: id seen for first time.\n");
 		}
                   $1->p->type=cur_type;
@@ -343,7 +349,9 @@ init_id		: ID
 		| ID OP_ASSIGN relop_expr
 	{
   printf("%s ------\n" , $1->p->id);
-  char buf[20]; sprintf(buf, "sw $%d, %s", $3.place, $3.name);emit(buf);
+  fp_pos -= 4;
+  $1->p->stkPos = fp_pos;
+  char buf[20]; sprintf(buf, "sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
                 if($1->p->first_time==0) {
                  	printf("ID (%s) redeclared\n",$1->p->id);
 			error = 1;
@@ -404,7 +412,7 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 	}
 		| var_ref OP_ASSIGN relop_expr MK_SEMICOLON
 	{				/*Function return type comparison goes here?*/
-  char buf[20]; sprintf(buf, "sw $%d, %s", $3.place, $1->p->id);emit(buf);
+  char buf[20]; sprintf(buf, "sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
 //		printf("stmt: ID = %s, type = %d, return_type = %d\n", $1->p->id, $1->p->type, $3);
 		if($1->p->type != $3.nt_type && (is_nt_func == 1)) {
 			printf("ID = %s : Incompatible return types\n", $1->p->id);
