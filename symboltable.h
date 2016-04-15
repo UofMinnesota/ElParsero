@@ -30,7 +30,9 @@ struct com_node{	/* Structure for Comments */
     char *com;
     struct com_node *next;
 };
+struct com_node *comtab,*curcom;
 
+int nextRegister;
 struct registe{
   char name[256];
   int place;
@@ -38,7 +40,9 @@ struct registe{
 };
 typedef struct registe* regist;
 regist reg;
-struct com_node *comtab,*curcom;
+
+
+
 
 /* Function definitions */
 int hash(char *key);
@@ -47,6 +51,7 @@ struct com_node* getcomment(char *str);
 void init_symtab();
 ptr insert_id(char *text,int scope);
 int insert_inRegister(char name[]);
+void print_registers();
 ptr lookup(char *text,int scope);
 void print_symtab();
 void cleanup_symtab(int scope);

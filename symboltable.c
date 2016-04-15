@@ -3,45 +3,58 @@
 #include<malloc.h>
 #include<ctype.h>
 #include "symboltable.h"
+nextRegister = 8;
+
+void print_registers()	/* Print Symbol Table */
+{
+    regist aux = reg;
+
+    while(aux!=NULL){
+        printf("name:%s\n", aux->name);
+        aux=aux->next;
+    }
+
+    return;
+}
 
 int find_inRegister(char name[]){
   regist aux = reg;
   while(aux != NULL){
     if(!strcmp(aux->name, name)){
+      //printf("place find:%d\n", aux->place);
       return aux->place;
     }
     aux = aux->next;
   }
-
   return 0;
 }
 
 int insert_inRegister(char name[]){
   int place = 0;
-  if(place = find_inRegister(name[])){    //if find the name in the register
+  if(place = find_inRegister(name)){    //if find the name in the register
       return place; //return place
   }
   else{
       regist aux = reg;
-
+      regist prev;
       while(aux!=NULL){
+          prev = aux;
           aux=aux->next;
       }
-      ptr tmp;
-      tmp=(ptr)malloc(sizeof(struct node));
-      strcpy(tmp->id,text);
-      if(p==symtab[val]){
-          q=getnode(text);
-          q->next=p;
-          symtab[val]=q;
-          return symtab[val];
+
+      aux=(regist)malloc(sizeof(struct registe));
+      strcpy(aux->name,name);
+
+      place = nextRegister;
+      nextRegister = 8 + (nextRegister + 1) % 8;
+      aux->place = place;
+      if(prev != NULL){
+        prev-> next = aux;
       }
-      else{   //insert the new node between q and p
-          q->next=getnode(text);
-          q->scope=cur_scope;
-          (q->next)->next=p;
-          return q->next;
+      if(reg == NULL){
+        reg = aux;
       }
+      return place;
   }
 }
 

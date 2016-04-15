@@ -348,15 +348,11 @@ init_id		: ID
 	}
 		| ID OP_ASSIGN relop_expr
 	{
-<<<<<<< HEAD
+
   //printf("%s ------\n" , $1->p->id);
-  char buf[20]; sprintf(buf, "sw $%d, %s", $3.place, $3.name);emit(buf);
-=======
-  printf("%s ------\n" , $1->p->id);
   fp_pos -= 4;
   $1->p->stkPos = fp_pos;
   char buf[20]; sprintf(buf, "sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
->>>>>>> 307b83adc2690becf6a6ed4a6ae1960ecdc12711
                 if($1->p->first_time==0) {
                  	printf("ID (%s) redeclared\n",$1->p->id);
 			error = 1;
@@ -452,16 +448,16 @@ relop_expr	: relop_term
 	{
 		$$ = $1;strcpy($$.name, $1.name);;
 //		printf("relop_expr: array arg # = %d.\n", $$.func_list_num);
-printf("%s\n" , $1.name);
+//printf("%s\n" , $1.name);
 	}
 		| relop_expr OP_OR relop_term
 		;
 
-relop_term	: relop_factor  {$$ = $1;strcpy($$.name, $1.name);printf("%s\n" , $1.name);}
+relop_term	: relop_factor  {$$ = $1;strcpy($$.name, $1.name);}//printf("%s\n" , $1.name);
 		| relop_term OP_AND relop_factor
 		;
 
-relop_factor	: expr {$$ = $1;strcpy($$.name, $1.name);printf("%s\n" , $1.name);}
+relop_factor	: expr {$$ = $1;strcpy($$.name, $1.name);}//printf("%s\n" , $1.name);
 		| expr rel_op expr
 		;
 
@@ -506,7 +502,7 @@ nonempty_relop_expr_list	: nonempty_relop_expr_list MK_COMMA relop_expr
 	}
 		;
 
-expr		: expr add_op term {char buf[20]; sprintf(buf, "%s $%d, $%d, $%d ", $2, temp_place, $1.place, $3.place);emit(buf); $$.place = temp_place; temp_place = 8 + (temp_place + 1) % 8; $1.place = temp_place;}
+expr		: expr add_op term {temp_place = insert_inRegister($1.name);char buf[20]; sprintf(buf, "%s $%d, $%d, $%d ", $2, temp_place, $1.place, $3.place);emit(buf); $$.place = temp_place; temp_place = 8 + (temp_place + 1) % 8; $1.place = temp_place;}
 		| term
 	{
 
@@ -520,7 +516,7 @@ add_op		: OP_PLUS {$$ = "add";}
 		| OP_MINUS {$$ = "sub";}
 		;
 
-term		: term mul_op factor {char buf[20]; sprintf(buf, "%s $%d, $%d, $%d", $2, temp_place, $1.place, $3.place);emit(buf);temp_place = 8 + (temp_place + 1) % 8; $1.place = temp_place;}	//
+term		: term mul_op factor {temp_place = insert_inRegister($1.name); char buf[20]; sprintf(buf, "%s $%d, $%d, $%d", $2, temp_place, $1.place, $3.place);emit(buf); $1.place = temp_place;}	//
 		| factor //comentei aqui{$$ = $1;}	/*For function return type?*/
 		{$$ = $1;}
     ;
@@ -536,11 +532,17 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
  	"if(-(i < 10))".	*/
 		| OP_MINUS MK_LPAREN relop_expr MK_RPAREN	/*How to check Array subscript?*/
 		| CONST {$$.nt_type = $1->con_type;
-    if($1->place == 0){
-      $1->place = temp_place;
-      temp_place = 8 + (temp_place + 1) % 8;
+    char na[256];
+    sprintf(na, "%d", $1->const_u.ival);
+
+    if(!find_inRegister(na)){
+      $1->place = insert_inRegister(na);
+      char buf[20];
+      sprintf(buf, "li $%d, %d", $1->place, $1->const_u.ival);
+      emit(buf);
     }
-    char buf[20]; sprintf(buf, "li $%d, %d", $1->place, $1->const_u.ival);emit(buf); $$.place = $1->place;}		/*Checking Array subscript.*/ //miguel
+    $1->place = insert_inRegister(na);
+    $$.place = $1->place;}		/*Checking Array subscript.*/
 	//{printf("ID: %d\n", $1->const_u.ival);}
 		/* | - constant, here - is an Unary operator */
 		| OP_NOT CONST {$$.nt_type = $2->con_type;}	/*Checking Array subscript.*/
@@ -580,7 +582,16 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 		| OP_MINUS ID MK_LPAREN relop_expr_list MK_RPAREN
 		| var_ref
 		/* | - var-reference */
-{char buf[20]; sprintf(buf, "lw $%s, %s", $1->p->id, $1->p->id);emit(buf);
+{
+
+  temp_place = find_inRegister($1->p->id);
+  if($1->p->scope == 0 && ! temp_place){
+    char buf[20];
+    temp_place = insert_inRegister($1->p->id);
+    sprintf(buf, "lw $%d, _%s", temp_place, $1->p->id);
+    emit(buf);
+  }
+  $$.place = temp_place;
 $$.nt_type = $1->p->type;			/*Type to be used in array subscript.*/
 	$$.func_list_num = tmp_array_dim;		//# of Dimensions.
 	strcpy($$.name, $1->p->id);
@@ -716,7 +727,7 @@ int main (int argc, char *argv[])
     }
 //    print_symtab();
     cleanup_symtab(-1); //clean up the entire symbol table
-
+    //print_registers();
     fclose(f);
     return 0;
 } /* main */

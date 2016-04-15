@@ -19,29 +19,20 @@ _begin_main:
 li $8, 20
 li $9, 5
 sub $10, $8, $9 
-<<<<<<< HEAD
-sw $10, °±Ë
-=======
-sw $10, -24($fp)
->>>>>>> 307b83adc2690becf6a6ed4a6ae1960ecdc12711
+sw $10, -20($fp)
 li $11, 100
 sw $11, -4($fp)
-lw $globalinto, globalinto
-li $12, 20
-mul $13, $0, $12
-li $14, 5
-sub $15, $0, $14 
+lw $12, _globalint
+mul $12, $0, $8
+sub $12, $0, $9 
+sw $12, -8($fp)
+li $13, 10
+sw $13, -12($fp)
+li $14, 3
+add $15, $0, $14 
 sw $15, -12($fp)
-li $8, 10
-sw $8, -16($fp)
-lw $a, a
-li $9, 3
-add $10, $0, $9 
-sw $10, -16($fp)
-lw $localint, localint
-li $11, 5
-div $12, $0, $11
-sw $0, -20($fp)
+div $8, $0, $9
+sw $0, -16($fp)
 
 
 _end_main:
@@ -62,5 +53,4 @@ _end_main:
 
 .data
 _globalint: .word 0
-_globalinto: .word 0
 _framesize_main: .word 36
