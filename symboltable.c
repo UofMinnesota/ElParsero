@@ -3,10 +3,53 @@
 #include<malloc.h>
 #include<ctype.h>
 #include "symboltable.h"
-nextRegister = 8;
 
-void print_registers()	/* Print Symbol Table */
-{
+int getEmptyReg(int floatOffset){
+  int empty = 8 + floatOffset;
+  while(empty_reg[empty + floatOffset] == 1){
+      empty++;
+      if(empty > 16 + floatOffset){
+        empty = reg->place + floatOffset;
+        delete_inregister(reg->place + floatOffset);
+        empty_reg[empty] = 1;
+        return empty;
+      }
+  }
+  empty_reg[empty] = 1;
+  return empty;
+}
+
+void delete_inregister(int place){
+  regist aux = reg;
+  regist prev = NULL;
+  while(aux != NULL){
+    if(aux->place == place){
+      empty_reg [aux->place] = 0;
+      if(prev != NULL){
+        prev->next = aux->next;
+      }else{
+        reg = aux->next;
+      }
+      free(aux);
+      return;
+    }
+    prev = aux;
+    aux = aux->next;
+  }
+  return;
+}
+
+void clear_inregister(){
+  regist p, q;
+  p=reg;
+  while(p){
+      q=p->next;
+      free(p);
+      p=q;
+  }
+}
+
+void print_registers(){
     regist aux = reg;
 
     while(aux!=NULL){
@@ -44,17 +87,18 @@ int insert_inRegister(char name[]){
 
       aux=(regist)malloc(sizeof(struct registe));
       strcpy(aux->name,name);
-
-      place = nextRegister;
-      nextRegister = 8 + (nextRegister + 1) % 8;
-      aux->place = place;
+      if(!isFloat(name)){
+        aux->place = getEmptyReg(0);
+      }else{
+        aux->place = getEmptyReg(25);
+      }
       if(prev != NULL){
         prev-> next = aux;
       }
       if(reg == NULL){
         reg = aux;
       }
-      return place;
+      return aux->place;
   }
 }
 
@@ -146,6 +190,20 @@ ptr lookup(char *text, int scope)
         p=p->next;
     }
     return p;
+}
+int isFloat(char name[]){
+  int aux = 0;
+  int val=hash(name);
+  ptr p=symtab[val];
+  while(p!=NULL){
+      if(!strcmp(p->id,name))
+          if(p->type == type_float){
+            aux = 1;
+          }
+          return aux;
+      p=p->next;
+  }
+  return aux;
 }
 void print_symtab()	/* Print Symbol Table */
 {

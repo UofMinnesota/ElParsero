@@ -1,6 +1,6 @@
 /* TestCase 1: Variable Declarations */
 
-int globalint;
+float globalint;
 
 void main()
 {

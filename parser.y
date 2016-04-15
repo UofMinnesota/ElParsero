@@ -356,6 +356,7 @@ init_id		: ID
     char buf[20];
     sprintf(buf, "sw $%d, %d($fp)", $3.place, $1->p->stkPos);
     emit(buf);
+    delete_inregister($3.place);
   }
                 if($1->p->first_time==0) {
                  	printf("ID (%s) redeclared\n",$1->p->id);
@@ -417,10 +418,22 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 	}
 		| var_ref OP_ASSIGN relop_expr MK_SEMICOLON
 	{				/*Function return type comparison goes here?*/
-  if($1->p->scope != 0){
-    char buf[20]; sprintf(buf, "sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
-  }else{
-    char buf[20]; sprintf(buf, "sw $%d, _%s", $3.place, $1->p->id);emit(buf);
+  if($1->p->type == type_int && $3.place < 32){ // integer
+    if($1->p->scope != 0){
+      char buf[20]; sprintf(buf, "sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
+      delete_inregister($3.place);
+    }else{
+      char buf[20]; sprintf(buf, "sw $%d, _%s", $3.place, $1->p->id);emit(buf);
+      delete_inregister($3.place);
+    }
+  }else{ //float
+    if($1->p->scope != 0){
+      char buf[20]; sprintf(buf, "s.s $f%d, %d($fp)", $3.place - 32, $1->p->stkPos);emit(buf);
+      delete_inregister($3.place);
+    }else{
+      char buf[20]; sprintf(buf, "s.s $f%d, _%s", $3.place, $1->p->id);emit(buf);
+      delete_inregister($3.place);
+    }
   }
 //		printf("stmt: ID = %s, type = %d, return_type = %d\n", $1->p->id, $1->p->type, $3);
 		if($1->p->type != $3.nt_type && (is_nt_func == 1)) {
@@ -510,7 +523,19 @@ nonempty_relop_expr_list	: nonempty_relop_expr_list MK_COMMA relop_expr
 	}
 		;
 
-expr		: expr add_op term {temp_place = insert_inRegister($1.name);char buf[20]; sprintf(buf, "%s $%d, $%d, $%d ", $2, temp_place, $1.place, $3.place);emit(buf); $$.place = temp_place; temp_place = 8 + (temp_place + 1) % 8; $1.place = temp_place;}
+expr		: expr add_op term {temp_place = insert_inRegister($1.name);
+                              char buf[20];
+                             if(temp_place < 32){
+                               sprintf(buf, "%s $%d, $%d, $%d ", $2, temp_place, $1.place, $3.place);
+                             }else{
+                               if($2 == "add"){
+                                 sprintf(buf, "add.s $f%d, $f%d, $%d ", temp_place-32, $1.place-32, $3.place);
+                               }else{
+                                 sprintf(buf, "sub.s $f%d, $f%d, $%d ", temp_place-32, $1.place-32, $3.place);
+                               }
+                             }
+                             emit(buf);
+                             $$.place = temp_place; }
 		| term
 	{
 
@@ -524,7 +549,21 @@ add_op		: OP_PLUS {$$ = "add";}
 		| OP_MINUS {$$ = "sub";}
 		;
 
-term		: term mul_op factor {temp_place = insert_inRegister($1.name); char buf[20]; sprintf(buf, "%s $%d, $%d, $%d", $2, temp_place, $1.place, $3.place);emit(buf); $1.place = temp_place;}	//
+term		: term mul_op factor {temp_place = insert_inRegister($1.name);
+                              char buf[20];
+                              if(temp_place < 32){
+                                sprintf(buf, "%s $%d, $%d, $%d", $2, temp_place, $1.place, $3.place);
+                                emit(buf);
+                              }else{
+                                if($2 == "mul"){
+                                  sprintf(buf, "mul.s $f%d, $f%d, $%d", temp_place - 32, $1.place - 32, $3.place);
+                                  emit(buf);
+                                }else{
+                                  sprintf(buf, "div.s $f%d, $f%d, $%d", temp_place - 32, $1.place -32, $3.place);
+                                  emit(buf);
+                                }
+                              }
+                              $1.place = temp_place;}	//
 		| factor //comentei aqui{$$ = $1;}	/*For function return type?*/
 		{$$ = $1;}
     ;
@@ -593,11 +632,27 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 {
 
   temp_place = find_inRegister($1->p->id);
+
   if($1->p->scope == 0 && !temp_place){
     char buf[20];
     temp_place = insert_inRegister($1->p->id);
-    sprintf(buf, "lw $%d, _%s", temp_place, $1->p->id);
-    emit(buf);
+    if(temp_place < 32){
+      sprintf(buf, "lw $%d, %d($fp)", temp_place, $1->p->stkPos);
+      emit(buf);
+    }else{
+      sprintf(buf, "l.s $f%d, %d($fp)", temp_place-32, $1->p->stkPos);
+      emit(buf);
+    }
+  }else if (!temp_place){
+    char buf[20];
+    temp_place = insert_inRegister($1->p->id);
+    if(temp_place < 32){
+      sprintf(buf, "lw $%d, %d($fp)", temp_place, $1->p->stkPos);
+      emit(buf);
+    }else{
+      sprintf(buf, "l.s $f%d, %d($fp)", temp_place-32, $1->p->stkPos);
+      emit(buf);
+    }
   }
   $$.place = temp_place;
 $$.nt_type = $1->p->type;			/*Type to be used in array subscript.*/
@@ -721,11 +776,11 @@ int main (int argc, char *argv[])
       for(i=0;i<TABLESIZE;i++){
           p=symtab[i];
           while(p!=NULL){
-
-              if(p->type == type_int){
-                sprintf(buf, "_%s: .word %d", p->id, value);
-                emit(buf);
+              if(p->type == type_int || p->type == type_float){
+                  sprintf(buf, "_%s: .word %d", p->id, value);
+                  emit(buf);
               }
+
               p=p->next;
           }
       }
@@ -736,6 +791,7 @@ int main (int argc, char *argv[])
 //    print_symtab();
     cleanup_symtab(-1); //clean up the entire symbol table
     //print_registers();
+    clear_inregister();
     fclose(f);
     return 0;
 } /* main */
