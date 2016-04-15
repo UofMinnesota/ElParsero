@@ -352,7 +352,11 @@ init_id		: ID
   //printf("%s ------\n" , $1->p->id);
   fp_pos -= 4;
   $1->p->stkPos = fp_pos;
-  char buf[20]; sprintf(buf, "sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
+  if($1->p->scope != 0){
+    char buf[20];
+    sprintf(buf, "sw $%d, %d($fp)", $3.place, $1->p->stkPos);
+    emit(buf);
+  }
                 if($1->p->first_time==0) {
                  	printf("ID (%s) redeclared\n",$1->p->id);
 			error = 1;
@@ -413,7 +417,11 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 	}
 		| var_ref OP_ASSIGN relop_expr MK_SEMICOLON
 	{				/*Function return type comparison goes here?*/
-  char buf[20]; sprintf(buf, "sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
+  if($1->p->scope != 0){
+    char buf[20]; sprintf(buf, "sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
+  }else{
+    char buf[20]; sprintf(buf, "sw $%d, _%s", $3.place, $1->p->id);emit(buf);
+  }
 //		printf("stmt: ID = %s, type = %d, return_type = %d\n", $1->p->id, $1->p->type, $3);
 		if($1->p->type != $3.nt_type && (is_nt_func == 1)) {
 			printf("ID = %s : Incompatible return types\n", $1->p->id);

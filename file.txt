@@ -21,7 +21,7 @@ li $9, 5
 sub $10, $8, $9 
 sw $10, -20($fp)
 li $11, 100
-sw $11, -4($fp)
+sw $11, _globalint
 lw $12, _globalint
 mul $12, $12, $8
 sub $12, $12, $9 
