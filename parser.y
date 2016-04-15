@@ -585,7 +585,7 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 {
 
   temp_place = find_inRegister($1->p->id);
-  if($1->p->scope == 0 && ! temp_place){
+  if($1->p->scope == 0 && !temp_place){
     char buf[20];
     temp_place = insert_inRegister($1->p->id);
     sprintf(buf, "lw $%d, _%s", temp_place, $1->p->id);
