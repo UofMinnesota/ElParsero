@@ -19,19 +19,21 @@ _begin_main:
 li $8, 20
 li $9, 5
 sub $10, $8, $9 
-sw $10, -20($fp)
+sw $10, -24($fp)
 li $11, 100
 sw $11, _globalint
 lw $12, _globalint
 mul $12, $12, $8
 sub $12, $12, $9 
 sw $12, -8($fp)
-li $13, 10
-sw $13, -12($fp)
-li $14, 3
-add $15, $0, $14 
-sw $15, -12($fp)
-div $8, $0, $9
+li $13, 90
+sw $13, -20($fp)
+li $14, 10
+sw $14, -12($fp)
+li $15, 3
+add $8, $0, $15 
+sw $8, -12($fp)
+div $9, $0, $9
 sw $0, -16($fp)
 
 

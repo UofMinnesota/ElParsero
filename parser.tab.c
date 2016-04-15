@@ -2387,7 +2387,7 @@ emit(buf);
 int main (int argc, char *argv[])
 {
     init_symtab();
-    f = fopen("file.txt", "w");
+    f = fopen("file.spim", "w");
     printf("Symbol Table initialized\n");
     emit(".text");
     if(argc>0)
