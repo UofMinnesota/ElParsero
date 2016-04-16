@@ -40,7 +40,7 @@ struct registe{
 };
 typedef struct registe* regist;
 regist reg;
-
+regist arrays;
 
 int empty_reg[64];
 

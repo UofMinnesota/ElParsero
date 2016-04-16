@@ -100,6 +100,7 @@ int insert_inRegister(char name[]){
   }
 }
 
+
 int hash(char *key) /*Hash function */
 {
     int val=0,pow=1,len,i;
