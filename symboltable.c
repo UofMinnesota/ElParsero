@@ -25,8 +25,9 @@ regist delete_inregister(regist currP, int value){
     return NULL;
 
   if (currP->place == value) {
-    regist *tempNextP;
+    regist tempNextP;
     tempNextP = currP->next;
+    empty_reg[value] = 0;
     free(currP);
     return tempNextP;
   }

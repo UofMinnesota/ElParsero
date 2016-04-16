@@ -14,9 +14,9 @@ void main()
 
   b = 90;
   a = 10;
-  /*a = a + 3;  /* error 2, undeclear b */
+  a = a + 3;  /* error 2, undeclear b */
 
-  /*g = localint / 5;*/
+  g = localint / 5;
 
   return;
 }

@@ -20,19 +20,26 @@ li $8, 20
 li $9, 5
 sub $10, $8, $9 
 sw $10, -24($fp)
-li $11, 100
-sw $11, _globalint
-lw $12, _globalint
-mul $12, $12, $8
-sub $12, $12, $9 
-sw $12, -8($fp)
-li $13, 1
-li $14, 200
-sw $14, _vector($12)
-li $15, 90
-sw $15, -20($fp)
-li $16, 10
-sw $16, -12($fp)
+li $10, 100
+sw $10, _globalint
+lw $10, _globalint
+mul $10, $10, $8
+sub $10, $10, $9 
+sw $10, -8($fp)
+li $10, 1
+li $11, 200
+sw $11, _vector($10)
+li $11, 90
+sw $11, -20($fp)
+li $11, 10
+sw $11, -12($fp)
+lw $11, -12($fp)
+li $12, 3
+add $11, $11, $12 
+sw $11, -12($fp)
+lw $11, -8($fp)
+div $11, $11, $9
+sw $11, -16($fp)
 
 
 _end_main:
