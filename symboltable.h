@@ -60,5 +60,6 @@ void init_comtab();
 void insert_comment(char *comment);
 void print_comtab();
 void cleanup_comtab();
+void insertArray(char name[], int dim);
 void clear_inregister();
 regist delete_inregister(regist currP, int value);

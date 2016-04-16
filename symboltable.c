@@ -100,7 +100,26 @@ int insert_inRegister(char name[]){
   }
 }
 
-
+void insertArray(char name[], int dim){
+  regist aux = arrays;
+  regist prev;
+  while(aux!=NULL){
+      prev = aux;
+      aux=aux->next;
+  }
+  aux=(regist)malloc(sizeof(struct registe));
+  strcpy(aux->name,name);
+  aux->next = NULL;
+  
+  aux->place = dim;
+  if(prev != NULL){
+    prev-> next = aux;
+  }
+  if(arrays == NULL){
+    arrays = aux;
+  }
+  return;
+}
 int hash(char *key) /*Hash function */
 {
     int val=0,pow=1,len,i;

@@ -189,9 +189,9 @@ param		: type ID
 		$2->p->scope = 1;
 		$2->p->type = $1;
 		$2->p->first_time = 0;
-//		printf("param: scope = 1 for ID %s\n", $2->p->id);
+		//printf("param: scope = 1 for ID %s\n", $2->p->id);
 		$$ = $3;		//Passing on array dimensions.
-//		printf("param: scope = 1 for ID %s, array_dim = %d.\n", $2->p->id, $$);
+    //		printf("param: scope = 1 for ID %s, array_dim = %d.\n", $2->p->id, $$);
 	}
 		| struct_type ID dim_fn
 		;
@@ -265,6 +265,8 @@ dim_decl	: MK_LB cexpr MK_RB
 	{
 //VM		$$ = 1;			/*Dimension count.*/
 		$$.func_list_num = 1;				/*Argument count.*/
+    $$.place = $2.place;
+    //printf("place:%d", $2.place); //el par
 //		$$.func_arg_type[$$.func_list_num] = 1;		/*Dimension count.*/
 //VM		if($2 != type_int) {		/*Dimension type check.*/
 		if($2.nt_type != type_int) {		/*Dimension type check.*/
@@ -272,6 +274,7 @@ dim_decl	: MK_LB cexpr MK_RB
 //			printf("dim_decl_1: cexpr = %d\n", $2);
 			error = 1;
 		}
+
 	}
 		| dim_decl MK_LB cexpr MK_RB
 	{
@@ -287,12 +290,12 @@ dim_decl	: MK_LB cexpr MK_RB
 	}
 		;
 cexpr		: cexpr add_op mcexpr
-		| mcexpr {$$.nt_type = $1.nt_type;}
+		| mcexpr {$$.nt_type = $1.nt_type; $$.place = $1.place;}
 		;
 mcexpr		: mcexpr mul_op cfactor
-		| cfactor {$$.nt_type = $1.nt_type;}
+		| cfactor {$$.nt_type = $1.nt_type; $$.place = $1.place;}
 		;
-cfactor:	CONST {$$.nt_type = $1->con_type;}
+cfactor:	CONST {$$.nt_type = $1->con_type; $$.place = $1->const_u.ival;}
 		| MK_LPAREN cexpr MK_RPAREN
 		;
 
@@ -345,7 +348,8 @@ init_id		: ID
 	$1->p->is_array = 1;
 //VM	$1->p->array_dim = $2;
 	$1->p->array_dim = $2.func_list_num;
-//	printf("init_id_2: #dims = %d\n", $1->p->array_dim);
+  //printf("%d", $2.place);
+  insertArray($1->p->id, $2.place);
 	}
 		| ID OP_ASSIGN relop_expr
 	{
@@ -801,6 +805,28 @@ int main (int argc, char *argv[])
     }
 //    print_symtab();
     cleanup_symtab(-1); //clean up the entire symbol table
+    char buf[20];
+    char bufArray[100];
+    int where = 0;
+    regist aux = arrays;
+    while(aux!=NULL){
+
+        while(aux->place>0){
+
+          bufArray[where] = '0';
+          if(aux->place != 1){
+            bufArray[where+1] = ',';
+            bufArray[where+2] = ' ';
+            where+=3;
+          }
+
+          aux->place--;
+        }
+
+        sprintf(buf, "_%s: .word %s", aux->name, bufArray);
+        emit(buf);
+        aux=aux->next;
+    }
     //print_registers();
     //clear_inregister();
     fclose(f);

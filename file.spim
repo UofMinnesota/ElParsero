@@ -27,21 +27,19 @@ mul $10, $10, $8
 sub $10, $10, $9 
 sw $10, -8($fp)
 li $10, 2
-li $11, 1
-add $12, $10, $11 
-li $13, 200
-sw $13, _vector($11)
-li $13, 90
-sw $13, -20($fp)
-li $13, 10
-sw $13, -12($fp)
-lw $13, -12($fp)
-li $14, 3
-add $13, $13, $14 
-sw $13, -12($fp)
-lw $13, -8($fp)
-div $13, $13, $9
-sw $13, -16($fp)
+li $11, 200
+sw $11, _vector($0)
+li $11, 90
+sw $11, -20($fp)
+li $11, 10
+sw $11, -12($fp)
+lw $11, -12($fp)
+li $12, 3
+add $11, $11, $12 
+sw $11, -12($fp)
+lw $11, -8($fp)
+div $11, $11, $9
+sw $11, -16($fp)
 
 
 _end_main:
@@ -63,3 +61,4 @@ _end_main:
 .data
 _globalint: .word 0
 _framesize_main: .word 36
+_vector: .word 0, 0, 0

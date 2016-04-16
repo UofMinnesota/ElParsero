@@ -7,10 +7,10 @@ void main()
   int localint, a;
   int g, b;
   int localint2 = 20 - 5; /* error 1, redeclear localint */
-  int vector[4];
+  int vector[3];
   globalint = 100;
   localint = globalint * 20 - 5;
-  vector[1] = 200;
+  vector[2] = 200;
 
   b = 90;
   a = 10;
