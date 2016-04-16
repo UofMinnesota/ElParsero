@@ -429,8 +429,8 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
       delete_inregister(reg, $3.place);
     }else if($1->p->is_array == 1){
       char buff[20];
-      sprintf(buff, "%d", tmp_array_dim);
-      temp_place = find_inRegister(buff);
+
+      
       char buf[20]; sprintf(buf, "sw $%d, _%s($%d)", $3.place, $1->p->id, temp_place);
       emit(buf);
 

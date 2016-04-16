@@ -1828,8 +1828,8 @@ yyreduce:
       delete_inregister(reg, (yyvsp[-1].func_list).place);
     }else if((yyvsp[-3].variable)->p->is_array == 1){
       char buff[20];
-      sprintf(buff, "%d", tmp_array_dim);
-      temp_place = find_inRegister(buff);
+
+      
       char buf[20]; sprintf(buf, "sw $%d, _%s($%d)", (yyvsp[-1].func_list).place, (yyvsp[-3].variable)->p->id, temp_place);
       emit(buf);
 
