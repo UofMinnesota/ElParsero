@@ -132,6 +132,7 @@ function_decl	: type ID MK_LPAREN param_list MK_RPAREN MK_LBRACE {cur_scope++;} 
 
 		error = 1;
 	}
+
 	check_func_details($2, $4);
 	}
 //Vineeth: Function declarations. The above ones are function definitions
@@ -352,11 +353,11 @@ init_id		: ID
   //printf("%s ------\n" , $1->p->id);
   fp_pos -= 4;
   $1->p->stkPos = fp_pos;
-  if($1->p->scope != 0){
+  if($1->p->scope != 0 && $1->p->is_array == 0){
     char buf[20];
     sprintf(buf, "sw $%d, %d($fp)", $3.place, $1->p->stkPos);
     emit(buf);
-    delete_inregister($3.place);
+    delete_inregister(reg, $3.place);
   }
                 if($1->p->first_time==0) {
                  	printf("ID (%s) redeclared\n",$1->p->id);
@@ -364,7 +365,7 @@ init_id		: ID
 		}
                	else{  //ID being seen for the first time
                 	$1->p->first_time=0;
-                  //miguel register
+
                 }
                	$1->p->type=cur_type;
                 //printf("%s\n", $1->p->id); //$$ = $1;
@@ -419,20 +420,23 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 		| var_ref OP_ASSIGN relop_expr MK_SEMICOLON
 	{				/*Function return type comparison goes here?*/
   if($1->p->type == type_int && $3.place < 32){ // integer
-    if($1->p->scope != 0){
+    if($1->p->scope != 0 && $1->p->is_array == 0){
       char buf[20]; sprintf(buf, "sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
-      delete_inregister($3.place);
+      delete_inregister(reg, $3.place);
+    }else if($1->p->is_array == 1){
+      char buf[20]; sprintf(buf, "sw $%d, _%s($%d)", $3.place, $1->p->id, temp_place);emit(buf);
+      delete_inregister(reg, $3.place);
     }else{
       char buf[20]; sprintf(buf, "sw $%d, _%s", $3.place, $1->p->id);emit(buf);
-      delete_inregister($3.place);
+      delete_inregister(reg, $3.place);
     }
   }else{ //float
     if($1->p->scope != 0){
       char buf[20]; sprintf(buf, "s.s $f%d, %d($fp)", $3.place - 32, $1->p->stkPos);emit(buf);
-      delete_inregister($3.place);
+      delete_inregister(reg, $3.place);
     }else{
       char buf[20]; sprintf(buf, "s.s $f%d, _%s", $3.place, $1->p->id);emit(buf);
-      delete_inregister($3.place);
+      delete_inregister(reg, $3.place);
     }
   }
 //		printf("stmt: ID = %s, type = %d, return_type = %d\n", $1->p->id, $1->p->type, $3);
@@ -637,10 +641,10 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
     char buf[20];
     temp_place = insert_inRegister($1->p->id);
     if(temp_place < 32){
-      sprintf(buf, "lw $%d, %d($fp)", temp_place, $1->p->stkPos);
+      sprintf(buf, "lw $%d, _%s", temp_place, $1->p->id);
       emit(buf);
     }else{
-      sprintf(buf, "l.s $f%d, %d($fp)", temp_place-32, $1->p->stkPos);
+      sprintf(buf, "l.s $f%d, _%s", temp_place-32, $1->p->id);
       emit(buf);
     }
   }else if (!temp_place){
@@ -682,7 +686,9 @@ var_ref		: ID
 		| var_ref dim		/*Array.*/
 {
 //	printf("var_ref: variable is = %s\n", $1->p->id);
+
 }
+
 		| var_ref struct_tail
 		;
 
@@ -791,7 +797,7 @@ int main (int argc, char *argv[])
 //    print_symtab();
     cleanup_symtab(-1); //clean up the entire symbol table
     //print_registers();
-    clear_inregister();
+    //clear_inregister();
     fclose(f);
     return 0;
 } /* main */

@@ -61,4 +61,4 @@ void insert_comment(char *comment);
 void print_comtab();
 void cleanup_comtab();
 void clear_inregister();
-void delete_inregister(int place);
+regist delete_inregister(regist currP, int value);

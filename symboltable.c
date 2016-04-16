@@ -10,7 +10,7 @@ int getEmptyReg(int floatOffset){
       empty++;
       if(empty > 16 + floatOffset){
         empty = reg->place + floatOffset;
-        delete_inregister(reg->place + floatOffset);
+        delete_inregister(reg, reg->place + floatOffset);
         empty_reg[empty] = 1;
         return empty;
       }
@@ -19,24 +19,20 @@ int getEmptyReg(int floatOffset){
   return empty;
 }
 
-void delete_inregister(int place){
-  regist aux = reg;
-  regist prev = NULL;
-  while(aux != NULL){
-    if(aux->place == place){
-      empty_reg [aux->place] = 0;
-      if(prev != NULL){
-        prev->next = aux->next;
-      }else{
-        reg = aux->next;
-      }
-      free(aux);
-      return;
-    }
-    prev = aux;
-    aux = aux->next;
+regist delete_inregister(regist currP, int value){
+  /* See if we are at end of list. */
+  if (currP == NULL)
+    return NULL;
+
+  if (currP->place == value) {
+    regist *tempNextP;
+    tempNextP = currP->next;
+    free(currP);
+    return tempNextP;
   }
-  return;
+
+  currP->next = delete_inregister(currP->next, value);
+  return currP;
 }
 
 void clear_inregister(){
@@ -87,6 +83,7 @@ int insert_inRegister(char name[]){
 
       aux=(regist)malloc(sizeof(struct registe));
       strcpy(aux->name,name);
+      aux->next = NULL;
       if(!isFloat(name)){
         aux->place = getEmptyReg(0);
       }else{
