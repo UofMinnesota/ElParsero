@@ -15,16 +15,19 @@ void main()
   vector[2] = 200;
 
 
-  if(globalint >= 90){
+  if(globalint && b){
     b = 4;
-    if(b){
-      b = 1;
+    if(localint == 3){
+      b = 8;
+    }else{
+      b = 3;
     }
-
   }else{
     b = 1;
-    if(globalint){
-      a = 12;
+    if(globalint > 3){
+      g = 4;
+    }else{
+      g = 55;
     }
   }
   a = a +3;  /* error 2, undeclear b */

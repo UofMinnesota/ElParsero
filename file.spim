@@ -1,61 +1,69 @@
 .text
 main:
-sw $ra, 0($sp)
-sw $fp, -4($sp)
-add $fp, $sp, -4
-add $sp, $sp, -8
-lw $2, _framesize_main
-sub $sp, $sp, $2
-sw $8, 32($sp)
-sw $9, 28($sp)
-sw $10, 24($sp)
-sw $11, 20($sp)
-sw $12, 16($sp)
-sw $13, 12($sp)
-sw $14, 8($sp)
-sw $15, 4($sp)
+  sw $ra, 0($sp)
+  sw $fp, -4($sp)
+  add $fp, $sp, -4
+  add $sp, $sp, -8
+  lw $2, _framesize_main
+  sub $sp, $sp, $2
+  sw $8, 32($sp)
+  sw $9, 28($sp)
+  sw $10, 24($sp)
+  sw $11, 20($sp)
+  sw $12, 16($sp)
+  sw $13, 12($sp)
+  sw $14, 8($sp)
+  sw $15, 4($sp)
 
 _begin_main:
-li $8, 20
-li $9, 5
-sub $10, $8, $9 
-sw $10, -24($fp)
-li $10, 100
-sw $10, _globalint
-lw $10, _globalint
-mul $10, $10, $8
-sub $10, $10, $9 
-sw $10, -8($fp)
-li $10, 2
-li $11, 200
-sw $11, _vector($10)
-lw $11, _globalint
-li $12, 90
-sge $13, $11, $12
-beqz $13, lelse0
-li $13, 4
-sw $13, -20($fp)
-lw $13, -20($fp)
-beqz $13, lelse1
-li $14, 1
-sw $14, -20($fp)
+  li $8, 20
+  li $9, 5
+  sub $10, $8, $9 
+  sw $10, -24($fp)
+  li $10, 100
+  sw $10, _globalint
+  lw $10, _globalint
+  mul $10, $10, $8
+  sub $10, $10, $9 
+  sw $10, -8($fp)
+  li $10, 2
+  li $11, 200
+  sw $11, _vector($10)
+  lw $11, _globalint
+  lw $12, -20($fp)
+  beqz $11, lelse0
+  li $13, 4
+  sw $13, -20($fp)
+  lw $13, -8($fp)
+  li $14, 3
+  seq $15, $13, $14
+  beqz $15, lelse1
+  li $15, 8
+  sw $15, -20($fp)
+  j lexit1
 lelse1:
-j lexit0
+  sw $14, -20($fp)
+lexit1:
+  j lexit0
 lelse0:
-li $14, 1
-sw $14, -20($fp)
-beqz $11, lelse1
-li $14, 12
-sw $14, -12($fp)
-lelse1:
+  li $14, 1
+  sw $14, -20($fp)
+  li $14, 3
+  sgt $15, $11, $14
+  beqz $15, lelse2
+  li $15, 4
+  sw $15, -16($fp)
+  j lexit2
+lelse2:
+  li $15, 55
+  sw $15, -16($fp)
+lexit2:
 lexit0:
-lw $14, -12($fp)
-li $15, 3
-add $14, $14, $15 
-sw $14, -12($fp)
-lw $14, -8($fp)
-div $14, $14, $9
-sw $14, -16($fp)
+  lw $15, -12($fp)
+  add $15, $15, $14 
+  sw $15, -12($fp)
+  div $13, $13, $9
+  sw $13, -16($fp)
 
 
 _end_main:

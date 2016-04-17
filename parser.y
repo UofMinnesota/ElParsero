@@ -87,7 +87,7 @@ struct f_l{	//To get details of function arguments.
 %type <num> dim_fn dimfn1 param
 %type <func_list> param_list
 %type <func_list> relop_expr_list nonempty_relop_expr_list relop_expr relop_term relop_factor
-%type <func_list> expr term factor dim_decl cexpr mcexpr cfactor
+%type <func_list> expr term factor dim_decl cexpr mcexpr cfactor ifbegin
 %type <nt_type> type
 //%type <nt_type> relop_expr_list nonempty_relop_expr_list relop_expr relop_term relop_factor
 //%type <nt_type> expr term factor dim_decl cexpr mcexpr cfactor type
@@ -362,7 +362,7 @@ init_id		: ID
   $1->p->stkPos = fp_pos;
   if($1->p->scope != 0 && $1->p->is_array == 0){
     char buf[20];
-    sprintf(buf, "sw $%d, %d($fp)", $3.place, $1->p->stkPos);
+    sprintf(buf, "  sw $%d, %d($fp)", $3.place, $1->p->stkPos);
     emit(buf);
     delete_inregister(reg, $3.place);
   }
@@ -388,7 +388,7 @@ init_id		: ID
         }
 		;
 
-ifbegin: IF MK_LPAREN relop_expr {char buf[20];sprintf(buf,"beqz $%d, lelse%d", $3.place, ifnum++);emit(buf); ifnumbegin++;}
+ifbegin: IF MK_LPAREN relop_expr {$$.place = ifnum; char buf[20];sprintf(buf,"  beqz $%d, lelse%d", $3.place, ifnum++);emit(buf); }
       ;
 
 
@@ -402,13 +402,13 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 		| WHILE MK_LPAREN relop_expr_list MK_RPAREN stmt
 	        | FOR MK_LPAREN assign_expr_list MK_SEMICOLON relop_expr_list MK_SEMICOLON assign_expr_list MK_RPAREN stmt
 		/* | If then else here */
-		| ifbegin MK_RPAREN stmt {char buf[20];sprintf(buf,"j lexit%d", ifnum-1); emit(buf);}ELSE {char buf[20];sprintf(buf,"lelse%d:", ifnum-1);emit(buf);} stmt
+		| ifbegin MK_RPAREN stmt {char buf[20];sprintf(buf,"  j lexit%d", $1.place); emit(buf);}ELSE {char buf[20];sprintf(buf,"lelse%d:", $1.place);emit(buf);} stmt
     //exit ifelse
-      {char buf[20];sprintf(buf,"lexit%d:", --ifnum);emit(buf);}
+      {char buf[20];sprintf(buf,"lexit%d:", $1.place);emit(buf);}
 		/* | If statement here */
 		| ifbegin MK_RPAREN stmt {
         //endif
-        char buf[20];sprintf(buf,"lelse%d:", --ifnum);emit(buf);
+        char buf[20];sprintf(buf,"lelse%d:", $1.place);emit(buf);
     }
 		/* | read and write library calls -- note that read/write are not keywords */
 		| ID MK_LPAREN relop_expr_list MK_RPAREN	/*Function calls: need to check parameter number, type and return types.*/
@@ -437,26 +437,26 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 	{				/*Function return type comparison goes here?*/
   if($1->p->type == type_int && $3.place < 32){ // integer
     if($1->p->scope != 0 && $1->p->is_array == 0){
-      char buf[20]; sprintf(buf, "sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
+      char buf[20]; sprintf(buf, "  sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
       delete_inregister(reg, $3.place);
     }else if($1->p->is_array == 1){
       char buff[20];
 
 
-      char buf[20]; sprintf(buf, "sw $%d, _%s($%d)", $3.place, $1->p->id, temp_place);
+      char buf[20]; sprintf(buf, "  sw $%d, _%s($%d)", $3.place, $1->p->id, temp_place);
       emit(buf);
 
       delete_inregister(reg, $3.place);
     }else{
-      char buf[20]; sprintf(buf, "sw $%d, _%s", $3.place, $1->p->id);emit(buf);
+      char buf[20]; sprintf(buf, "  sw $%d, _%s", $3.place, $1->p->id);emit(buf);
       delete_inregister(reg, $3.place);
     }
   }else{ //float
     if($1->p->scope != 0){
-      char buf[20]; sprintf(buf, "s.s $f%d, %d($fp)", $3.place - 32, $1->p->stkPos);emit(buf);
+      char buf[20]; sprintf(buf, "  s.s $f%d, %d($fp)", $3.place - 32, $1->p->stkPos);emit(buf);
       delete_inregister(reg, $3.place);
     }else{
-      char buf[20]; sprintf(buf, "s.s $f%d, _%s", $3.place, $1->p->id);emit(buf);
+      char buf[20]; sprintf(buf, "  s.s $f%d, _%s", $3.place, $1->p->id);emit(buf);
       delete_inregister(reg, $3.place);
     }
   }
@@ -507,7 +507,7 @@ relop_factor	: expr {$$ = $1;strcpy($$.name, $1.name);}//printf("%s\n" , $1.name
 		| expr rel_op expr {int auxplace;int buf [20]; int bugg[20];
        sprintf(bugg, "%s,%d,%d", $2,$1.place, $3.place);
        auxplace = insert_inRegister(bugg);
-       sprintf(buf,"%s $%d, $%d, $%d", $2,auxplace, $1.place, $3.place);
+       sprintf(buf,"  %s $%d, $%d, $%d", $2,auxplace, $1.place, $3.place);
        emit(buf);$$.place = auxplace;
         delete_inregister(reg,auxplace);}
 		;
@@ -556,12 +556,12 @@ nonempty_relop_expr_list	: nonempty_relop_expr_list MK_COMMA relop_expr
 expr		: expr add_op term {temp_place = insert_inRegister($1.name);
                               char buf[20];
                              if(temp_place < 32){
-                               sprintf(buf, "%s $%d, $%d, $%d ", $2, temp_place, $1.place, $3.place);
+                               sprintf(buf, "  %s $%d, $%d, $%d ", $2, temp_place, $1.place, $3.place);
                              }else{
                                if($2 == "add"){
-                                 sprintf(buf, "add.s $f%d, $f%d, $%d ", temp_place-32, $1.place-32, $3.place);
+                                 sprintf(buf, "  add.s $f%d, $f%d, $%d ", temp_place-32, $1.place-32, $3.place);
                                }else{
-                                 sprintf(buf, "sub.s $f%d, $f%d, $%d ", temp_place-32, $1.place-32, $3.place);
+                                 sprintf(buf, "  sub.s $f%d, $f%d, $%d ", temp_place-32, $1.place-32, $3.place);
                                }
                              }
                              emit(buf);
@@ -582,14 +582,14 @@ add_op		: OP_PLUS {$$ = "add";}
 term		: term mul_op factor {temp_place = insert_inRegister($1.name);
                               char buf[20];
                               if(temp_place < 32){
-                                sprintf(buf, "%s $%d, $%d, $%d", $2, temp_place, $1.place, $3.place);
+                                sprintf(buf, "  %s $%d, $%d, $%d", $2, temp_place, $1.place, $3.place);
                                 emit(buf);
                               }else{
                                 if($2 == "mul"){
-                                  sprintf(buf, "mul.s $f%d, $f%d, $%d", temp_place - 32, $1.place - 32, $3.place);
+                                  sprintf(buf, "  mul.s $f%d, $f%d, $%d", temp_place - 32, $1.place - 32, $3.place);
                                   emit(buf);
                                 }else{
-                                  sprintf(buf, "div.s $f%d, $f%d, $%d", temp_place - 32, $1.place -32, $3.place);
+                                  sprintf(buf, "  div.s $f%d, $f%d, $%d", temp_place - 32, $1.place -32, $3.place);
                                   emit(buf);
                                 }
                               }
@@ -615,7 +615,7 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
     if(!find_inRegister(na)){
       $1->place = insert_inRegister(na);
       char buf[20];
-      sprintf(buf, "li $%d, %d", $1->place, $1->const_u.ival);
+      sprintf(buf, "  li $%d, %d", $1->place, $1->const_u.ival);
       emit(buf);
     }
     $1->place = insert_inRegister(na);
@@ -667,20 +667,20 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
     char buf[20];
     temp_place = insert_inRegister($1->p->id);
     if(temp_place < 32){
-      sprintf(buf, "lw $%d, _%s", temp_place, $1->p->id);
+      sprintf(buf, "  lw $%d, _%s", temp_place, $1->p->id);
       emit(buf);
     }else{
-      sprintf(buf, "l.s $f%d, _%s", temp_place-32, $1->p->id);
+      sprintf(buf, "  l.s $f%d, _%s", temp_place-32, $1->p->id);
       emit(buf);
     }
   }else if (!temp_place){
     char buf[20];
     temp_place = insert_inRegister($1->p->id);
     if(temp_place < 32){
-      sprintf(buf, "lw $%d, %d($fp)", temp_place, $1->p->stkPos);
+      sprintf(buf, "  lw $%d, %d($fp)", temp_place, $1->p->stkPos);
       emit(buf);
     }else{
-      sprintf(buf, "l.s $f%d, %d($fp)", temp_place-32, $1->p->stkPos);
+      sprintf(buf, "  l.s $f%d, %d($fp)", temp_place-32, $1->p->stkPos);
       emit(buf);
     }
   }
@@ -741,20 +741,20 @@ void generateMain()
 {
 char buf[2000];
 sprintf(buf, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s","main:",
-	"sw $ra, 0($sp)",
-	"sw $fp, -4($sp)",
-	"add $fp, $sp, -4",
-	"add $sp, $sp, -8",
-	"lw $2, _framesize_main",
-	"sub $sp, $sp, $2",
-	"sw $8, 32($sp)",
-	"sw $9, 28($sp)",
-	"sw $10, 24($sp)",
-	"sw $11, 20($sp)",
-	"sw $12, 16($sp)",
-	"sw $13, 12($sp)",
-	"sw $14, 8($sp)",
-	"sw $15, 4($sp)",
+	"  sw $ra, 0($sp)",
+	"  sw $fp, -4($sp)",
+	"  add $fp, $sp, -4",
+	"  add $sp, $sp, -8",
+	"  lw $2, _framesize_main",
+	"  sub $sp, $sp, $2",
+	"  sw $8, 32($sp)",
+	"  sw $9, 28($sp)",
+	"  sw $10, 24($sp)",
+	"  sw $11, 20($sp)",
+	"  sw $12, 16($sp)",
+	"  sw $13, 12($sp)",
+	"  sw $14, 8($sp)",
+	"  sw $15, 4($sp)",
   "_begin_main:"
 );
 emit(buf);
