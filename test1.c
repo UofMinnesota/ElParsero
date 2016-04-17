@@ -8,7 +8,7 @@ void main()
   int g, b;
   int localint2 = 20 - 5; /* error 1, redeclear localint */
   int vector[5];
-  int vector2f[10];
+  int vector2f[11];
     int vector32[8];
   globalint = 100;
   localint = globalint * 20 - 5;

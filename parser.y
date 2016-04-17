@@ -856,7 +856,8 @@ while(aux!=NULL){
     }
     aux = arrays;
     //printf("%s\n", "Shit reached here");
-    while(aux!=NULL && arrCont-- !=0){ ////Não vai querer remover isso bernardo
+    while(aux!=NULL /*&& arrCont-- !=0*/){ ////Não vai querer remover isso bernardo
+      ///////////// --------- CONTADOR ACIMA
       int oxo = 100;
       char bufArray[oxo];
       for(; oxo>=0; oxo--)
