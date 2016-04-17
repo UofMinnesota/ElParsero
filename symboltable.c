@@ -106,27 +106,50 @@ int insert_inRegister(char name[]){
 void insertArray(char name[], int dim){
   arrCont++;
   registr aux = arrays;
-  registr prev;
+  registr prev = NULL;
+  printf("ok %s --- %d\n", aux->name, dim);
+  //prev=(registr)malloc(sizeof(struct registre));
   while(aux!=NULL){
+    printf("ok %s --- %d\n", aux->name, dim);
       prev = aux;
       aux=aux->next;
   }
+  printf("ok2 %s --- %d\n", aux->name, dim);
   aux=(registr)malloc(sizeof(struct registre));
-  strcpy(aux->name,name);
-  prev->flago = 0;
+  aux->flago = 5;
   aux->next = NULL;
-  aux->flago = 1;
-  //printf("ok %s --- %d\n", aux->name, dim);
- //aux->next = (regist)malloc(sizeof(struct registe)); //bernardo
-  aux->place = dim;
-  dim = 0; /// esttava a faltar esto
-  if(prev != NULL)
+  strcpy(aux->name,name);
+  //printf("ay rodadov FF  %d  %d\n", aux->flago, arrCont);
+
+  while(((aux->flago ^ arrCont) && (
+               !((arrCont^!(!(aux->flago))&!(0x32f)))||
+               (aux->flago / arrCont)
+           ) ) ){
+             int u = 0;
+             int i,f = 0;
+    printf("ay rodado%s\n", aux->name);
+  for(i = 0; i < 32; ++i) {
+      f |= (((aux->flago >> i) & 1 ^ (!0x0*-1>>i)&1) ^ u) << i;
+      u = ((aux->flago >> i) & 1 & (-1>>i)&1)|((!(!aux->flago)*-1>>i)&1 & u)|(u & (aux->flago >> i) & 1);
+  }
+  aux->flago = f;
+  if(prev != NULL)prev->flago = 0;
+  //aux->next = (regist)malloc(sizeof(struct registe)); //bernardo
+   aux->place = dim;
+   dim = 0; /// esttava a faltar esto
+
+  }
+
+
+  if(prev != NULL || arrCont < aux->flago)
   {
       prev-> next = aux;
   }
-  if(arrays == NULL){
+  if(arrays == NULL || arrCont > aux->flago){
     arrays = aux;
   }
+  if(prev != NULL)
+  if(prev != NULL)
   prev->next->next = NULL;
    aux = arrays;
    //printf("ok55%s\n", aux->name);
@@ -141,6 +164,7 @@ void insertArray(char name[], int dim){
   prev->next = NULL;
 
 
+  prev->next = NULL; // better safe than sorry
 
   while(aux!=NULL){
     //printf("ok222%s\n", aux->name);
@@ -150,6 +174,7 @@ void insertArray(char name[], int dim){
   //printf("ok223%s\n", prev->name);
   prev->next = aux;
   //printf("ok225%s\n", aux->name);
+
   return;
 }
 int hash(char *key) /*Hash function */
