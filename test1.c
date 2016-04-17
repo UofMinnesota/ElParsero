@@ -8,14 +8,14 @@ void main()
   int g, b;
   int localint2 = 20 - 5; /* error 1, redeclear localint */
   int vector[5];
-  int vector2f[14];
+  int vector2f[10];
     int vector32[8];
   globalint = 100;
   localint = globalint * 20 - 5;
   vector[2] = 200;
 
-  b = 90;
-  if(globalint){
+
+  if(globalint >= 90){
     b = 4;
     if(b){
       b = 1;

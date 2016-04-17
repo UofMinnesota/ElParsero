@@ -91,7 +91,7 @@ struct f_l{	//To get details of function arguments.
 %type <nt_type> type
 //%type <nt_type> relop_expr_list nonempty_relop_expr_list relop_expr relop_term relop_factor
 //%type <nt_type> expr term factor dim_decl cexpr mcexpr cfactor type
-%type <variable> var_ref mul_op add_op
+%type <variable> var_ref mul_op add_op rel_op
 %type <variable> init_id
 
 %start program
@@ -504,17 +504,22 @@ relop_term	: relop_factor  {$$ = $1;strcpy($$.name, $1.name);}//printf("%s\n" , 
 		;
 
 relop_factor	: expr {$$ = $1;strcpy($$.name, $1.name);}//printf("%s\n" , $1.name);
-		| expr rel_op expr
+		| expr rel_op expr {int auxplace;int buf [20]; int bugg[20];
+       sprintf(bugg, "%s,%d,%d", $2,$1.place, $3.place);
+       auxplace = insert_inRegister(bugg);
+       sprintf(buf,"%s $%d, $%d, $%d", $2,auxplace, $1.place, $3.place);
+       emit(buf);$$.place = auxplace;
+        delete_inregister(reg,auxplace);}
 		;
 
 /* what relation operators do we support ? */
 /*Vineeth: Relational operators added.*/
-rel_op		: OP_LT
-		| OP_LE
-		| OP_GT
-		| OP_GE
-		| OP_EQ
-		| OP_NE
+rel_op		: OP_LT {$$ = "slt";}
+		| OP_LE {$$ = "sle";}
+		| OP_GT {$$ = "sgt";}
+		| OP_GE {$$ = "sge";}
+		| OP_EQ {$$ = "seq";}
+		| OP_NE {$$ = "sne";}
 		;
 
 relop_expr_list	: nonempty_relop_expr_list {$$ = $1;}
@@ -565,7 +570,7 @@ expr		: expr add_op term {temp_place = insert_inRegister($1.name);
 	{
 
 		$$ = $1;
-		//printf("expr:%s\n", $$.name);
+		//printf("expr:%s\n", $1.name);
 
 	}	/*For function return type?*/
 		;
@@ -791,14 +796,14 @@ int main (int argc, char *argv[])
     generateMain();
     registr aux = arrays;
     while(aux!=NULL){
-      printf("ok87-\n");
+      //printf("ok87-\n");
       //prev = aux;
         aux=(registr *)aux->next;
     }
     yyparse();
     aux = arrays;
     while(aux!=NULL){
-      printf("ok87-ss\n");
+      //printf("ok87-ss\n");
       //prev = aux;
         aux=(registr *)aux->next;
     }
@@ -809,7 +814,7 @@ int main (int argc, char *argv[])
     else{
       registr aux = arrays;
       while(aux!=NULL){
-        printf("ok87-++\n");
+        //printf("ok87-++\n");
         //prev = aux;
           aux=(registr *)aux->next;
       }
@@ -836,7 +841,7 @@ int main (int argc, char *argv[])
 //    print_symtab();
 aux = arrays;
 while(aux!=NULL){
-  printf("ok87-\n");
+  //printf("ok87-\n");
   //prev = aux;
     aux=(registr *)aux->next;
 }
@@ -845,12 +850,12 @@ while(aux!=NULL){
 
     aux = arrays;
     while(aux!=NULL){
-      printf("ok87\n");
+      //printf("ok87\n");
       //prev = aux;
         aux=(registr *)aux->next;
     }
     aux = arrays;
-    printf("%s\n", "Shit reached here");
+    //printf("%s\n", "Shit reached here");
     while(aux!=NULL && arrCont-- !=0){ ////Não vai querer remover isso bernardo
       int oxo = 100;
       char bufArray[oxo];
@@ -860,9 +865,9 @@ while(aux!=NULL){
       }
       int where = 0;
         int x = aux->place;
-        printf("%s - %d\n", "Shit reached here! dim:", x);
+        //printf("%s - %d\n", "Shit reached here! dim:", x);
         while(x>0){
-          printf("%s - %d\n", "added! dim:", x);
+          //printf("%s - %d\n", "added! dim:", x);
           bufArray[where] = '0';
           if(x != 1){
             bufArray[where+1] = ',';
@@ -872,26 +877,26 @@ while(aux!=NULL){
 
           x--;
         }
-          printf("%s%s\n", "Shit reached here? 1 - ",aux->name);
+          //printf("%s%s\n", "Shit reached here? 1 - ",aux->name);
 char buf[200];
         sprintf(buf, "_%s: .word %s", aux->name, bufArray);  ///essa funcao tá fudendo tudo
-          printf("%s%s\n", "Shit reached here? 2 - ",aux->name);
+          //printf("%s%s\n", "Shit reached here? 2 - ",aux->name);
         emit(buf);
-        printf("%s%s\n", "Shit reached here? 3 - ",aux->name);
+        //printf("%s%s\n", "Shit reached here? 3 - ",aux->name);
         //aux->next = NULL;  // /works with this M<<<<<<<<<<<<<<<<<<<<<<
         //if(aux != NULL && ((aux->next))!=NULL)
         //if(aux->next)
         //if(aux->flago == 0)
         {
-          printf("%s\n", "Shit got inside...");
+          //printf("%s\n", "Shit got inside...");
 
           aux=aux->next;
         }
-        printf("%s\n", "Shit reached");
+        //printf("%s\n", "Shit reached");
     }
     //print_registers();
     //clear_inregister();
-    printf("%s\n", "Shit reached here too");
+    //printf("%s\n", "Shit reached here too");
     fclose(f);
     return 0;
 } /* main */

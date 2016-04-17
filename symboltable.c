@@ -116,7 +116,7 @@ void insertArray(char name[], int dim){
   prev->flago = 0;
   aux->next = NULL;
   aux->flago = 1;
-  printf("ok %s --- %d\n", aux->name, dim);
+  //printf("ok %s --- %d\n", aux->name, dim);
  //aux->next = (regist)malloc(sizeof(struct registe)); //bernardo
   aux->place = dim;
   dim = 0; /// esttava a faltar esto
@@ -129,27 +129,27 @@ void insertArray(char name[], int dim){
   }
   prev->next->next = NULL;
    aux = arrays;
-   printf("ok55%s\n", aux->name);
+   //printf("ok55%s\n", aux->name);
     prev;
 
       while(aux!=NULL){
-        printf("ok222%s\n", aux->name);
+        //printf("ok222%s\n", aux->name);
     prev = aux;
       aux=(registr *)aux->next;
   }
-  printf("ok223%s\n", aux->name);
+  //printf("ok223%s\n", aux->name);
   prev->next = NULL;
 
 
 
   while(aux!=NULL){
-    printf("ok222%s\n", aux->name);
+    //printf("ok222%s\n", aux->name);
   prev = aux;
   aux=(registr *)aux->next;
   }
-  printf("ok223%s\n", prev->name);
+  //printf("ok223%s\n", prev->name);
   prev->next = aux;
-  printf("ok225%s\n", aux->name);
+  //printf("ok225%s\n", aux->name);
   return;
 }
 int hash(char *key) /*Hash function */
