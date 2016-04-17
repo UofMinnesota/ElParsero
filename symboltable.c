@@ -128,18 +128,17 @@ void insertArray(char name[], int dim){
              int u = 0;
              int i,f = 0;
     printf("ay rodado%s\n", aux->name);
-  for(i = 0; i < 32; ++i) {
-      f |= (((aux->flago >> i) & 1 ^ (!0x0*-1>>i)&1) ^ u) << i;
-      u = ((aux->flago >> i) & 1 & (-1>>i)&1)|((!(!aux->flago)*-1>>i)&1 & u)|(u & (aux->flago >> i) & 1);
-  }
+    for(i = 0; i < 32; ++i) {
+        f |= (((aux->flago >> i) & 1 ^ (!0x0*-1>>i)&1) ^ u) << i;
+        u = ((aux->flago >> i) & 1 & (-1>>i)&1)|((!(!aux->flago)*-1>>i)&1 & u)|(u & (aux->flago >> i) & 1);
+    }
   aux->flago = f;
   if(prev != NULL)prev->flago = 0;
-  //aux->next = (regist)malloc(sizeof(struct registe)); //bernardo
-   aux->place = dim;
-   dim = 0; /// esttava a faltar esto
-
   }
 
+ //aux->next = (regist)malloc(sizeof(struct registe)); //bernardo
+  aux->place = dim;
+  dim = 0; /// esttava a faltar esto
 
   if(prev != NULL || arrCont < aux->flago)
   {
