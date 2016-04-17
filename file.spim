@@ -77,4 +77,6 @@ _end_main:
 .data
 _globalint: .word 0
 _framesize_main: .word 36
-_vector: .word 0, 0, 0
+_vector: .word 0, 0, 0, 0, 0
+_vector2f: .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+_vector32: .word 0, 0, 0, 0, 0, 0, 0, 0

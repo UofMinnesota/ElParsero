@@ -37,15 +37,24 @@ struct registe{
   char name[256];
   int place;
   struct registe *next;
+  int flago ;
+};
+struct registre{
+  char name[256];
+  int place;
+  struct registre *next;
+  int flago ;
 };
 typedef struct registe* regist;
+typedef struct registre* registr;
 regist reg;
-regist arrays;
+registr arrays ;
 
 int empty_reg[64];
 
 /* Function definitions */
 int hash(char *key);
+int arrCont;
 ptr getnode(char *text);
 int isFloat(char name[]);
 struct com_node* getcomment(char *str);

@@ -7,7 +7,9 @@ void main()
   int localint, a;
   int g, b;
   int localint2 = 20 - 5; /* error 1, redeclear localint */
-  int vector[3];
+  int vector[5];
+  int vector2f[14];
+    int vector32[8];
   globalint = 100;
   localint = globalint * 20 - 5;
   vector[2] = 200;
@@ -25,7 +27,7 @@ void main()
       a = 12;
     }
   }
-  a = a + 3;  /* error 2, undeclear b */
+  a = a +3;  /* error 2, undeclear b */
 
   g = localint / 5;
 

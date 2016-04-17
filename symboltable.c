@@ -71,6 +71,7 @@ int find_inRegister(char name[]){
 
 int insert_inRegister(char name[]){
   int place = 0;
+  //return place;
   if(place = find_inRegister(name)){    //if find the name in the register
       return place; //return place
   }
@@ -103,23 +104,52 @@ int insert_inRegister(char name[]){
 
 
 void insertArray(char name[], int dim){
-  regist aux = arrays;
-  regist prev;
+  arrCont++;
+  registr aux = arrays;
+  registr prev;
   while(aux!=NULL){
       prev = aux;
       aux=aux->next;
   }
-  aux=(regist)malloc(sizeof(struct registe));
+  aux=(registr)malloc(sizeof(struct registre));
   strcpy(aux->name,name);
+  prev->flago = 0;
   aux->next = NULL;
-
+  aux->flago = 1;
+  printf("ok %s --- %d\n", aux->name, dim);
+ //aux->next = (regist)malloc(sizeof(struct registe)); //bernardo
   aux->place = dim;
-  if(prev != NULL){
-    prev-> next = aux;
+  dim = 0; /// esttava a faltar esto
+  if(prev != NULL)
+  {
+      prev-> next = aux;
   }
   if(arrays == NULL){
     arrays = aux;
   }
+  prev->next->next = NULL;
+   aux = arrays;
+   printf("ok55%s\n", aux->name);
+    prev;
+
+      while(aux!=NULL){
+        printf("ok222%s\n", aux->name);
+    prev = aux;
+      aux=(registr *)aux->next;
+  }
+  printf("ok223%s\n", aux->name);
+  prev->next = NULL;
+
+
+
+  while(aux!=NULL){
+    printf("ok222%s\n", aux->name);
+  prev = aux;
+  aux=(registr *)aux->next;
+  }
+  printf("ok223%s\n", prev->name);
+  prev->next = aux;
+  printf("ok225%s\n", aux->name);
   return;
 }
 int hash(char *key) /*Hash function */
@@ -160,6 +190,7 @@ struct com_node* getcomment(char *str)	/* Put comment into Comment Table */
 void init_symtab()	/* Initialize Symbol Table */
 {
     int i;
+    arrCont = 0;
     for(i=0;i<TABLESIZE;i++)
         symtab[i]=NULL;
     return;

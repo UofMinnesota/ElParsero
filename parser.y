@@ -636,7 +636,7 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 	}
 //	printf("factor: ID type - %d\n", $1->p->type);
 	if($1->p->type == type_func) {
-		is_nt_func = 1;		/*Set flag so that only functions are checked for return type.*/
+		is_nt_func = 1;		/*Set flint vector[3];ag so that only functions are checked for return type.*/
 		if(!strcmp($1->p->id, "read")) {
 			$1->p->return_type = type_int;
 //			printf("read() function\n");
@@ -789,6 +789,124 @@ int main (int argc, char *argv[])
     else
         yyin=stdin;
     generateMain();
+    registr aux = arrays;
+    while(aux!=NULL){
+      printf("ok87-\n");
+      //prev = aux;
+        aux=(registr *)aux->next;
+    }
+    yyparse();
+    aux = arrays;
+    while(aux!=NULL){
+      printf("ok87-ss\n");
+      //prev = aux;
+        aux=(registr *)aux->next;
+    }
+    endMain();
+    //print_symtab();
+    if (error == 1)
+	printf("%s\n", "Parsing completed. Errors found.");
+    else{
+      registr aux = arrays;
+      while(aux!=NULL){
+        printf("ok87-++\n");
+        //prev = aux;
+          aux=(registr *)aux->next;
+      }
+    	printf("%s\n", "Parsing completed. No errors found.");
+      emit("\n.data");
+      char buf[20];
+      ptr p;
+      int i, value = 0;
+      for(i=0;i<TABLESIZE;i++){
+          p=symtab[i];
+          while(p!=NULL){
+              if(p->type == type_int || p->type == type_float){
+                  sprintf(buf, "_%s: .word %d", p->id, value);
+                  emit(buf);
+              }
+
+              p=p->next;
+          }
+      }
+      sprintf(buf, "_framesize_main: .word 36", 2, 2);
+      emit(buf);
+
+    }
+//    print_symtab();
+aux = arrays;
+while(aux!=NULL){
+  printf("ok87-\n");
+  //prev = aux;
+    aux=(registr *)aux->next;
+}
+    cleanup_symtab(-1); //clean up the entire symbol table
+    /////////Eu acho que isso tá bem errado<<<<<<< aumentei para 2000 e parou o seg fault
+
+    aux = arrays;
+    while(aux!=NULL){
+      printf("ok87\n");
+      //prev = aux;
+        aux=(registr *)aux->next;
+    }
+    aux = arrays;
+    printf("%s\n", "Shit reached here");
+    while(aux!=NULL && arrCont-- !=0){ ////Não vai querer remover isso bernardo
+      int oxo = 100;
+      char bufArray[oxo];
+      for(; oxo>=0; oxo--)
+      {
+        bufArray[oxo] = 0;
+      }
+      int where = 0;
+        int x = aux->place;
+        printf("%s - %d\n", "Shit reached here! dim:", x);
+        while(x>0){
+          printf("%s - %d\n", "added! dim:", x);
+          bufArray[where] = '0';
+          if(x != 1){
+            bufArray[where+1] = ',';
+            bufArray[where+2] = ' ';
+            where+=3;
+          }
+
+          x--;
+        }
+          printf("%s%s\n", "Shit reached here? 1 - ",aux->name);
+char buf[200];
+        sprintf(buf, "_%s: .word %s", aux->name, bufArray);  ///essa funcao tá fudendo tudo
+          printf("%s%s\n", "Shit reached here? 2 - ",aux->name);
+        emit(buf);
+        printf("%s%s\n", "Shit reached here? 3 - ",aux->name);
+        //aux->next = NULL;  // /works with this M<<<<<<<<<<<<<<<<<<<<<<
+        //if(aux != NULL && ((aux->next))!=NULL)
+        //if(aux->next)
+        //if(aux->flago == 0)
+        {
+          printf("%s\n", "Shit got inside...");
+
+          aux=aux->next;
+        }
+        printf("%s\n", "Shit reached");
+    }
+    //print_registers();
+    //clear_inregister();
+    printf("%s\n", "Shit reached here too");
+    fclose(f);
+    return 0;
+} /* main */
+/*
+int main (int argc, char *argv[])
+{
+    init_symtab();
+    f = fopen("file.spim", "w");
+    printf("Symbol Table initialized\n");
+    emit(".text");
+    if(argc>0)
+        yyin = fopen(argv[1],"r");
+    else
+        yyin=stdin;
+    generateMain();
     yyparse();
     endMain();
     //print_symtab();
@@ -817,27 +935,28 @@ int main (int argc, char *argv[])
     }
 //    print_symtab();
     cleanup_symtab(-1); //clean up the entire symbol table
-    char buf[20];
+/// funciona com 21 por motivos desconhecidos// 21 dividido por 3?
     char bufArray[100];
     int where = 0;
-    regist aux = arrays;
-    while(aux!=NULL){
+    regist aux2 = arrays;
+    while(aux2!=NULL){
 
-        while(aux->place>0){
+        while(aux2->place>0){
 
           bufArray[where] = '0';
-          if(aux->place != 1){
+          if(aux2->place != 1){
             bufArray[where+1] = ',';
             bufArray[where+2] = ' ';
             where+=3;
           }
 
-          aux->place--;
+          aux2->place--;
         }
-
-        sprintf(buf, "_%s: .word %s", aux->name, bufArray);
+        char buf[100];
+        sprintf(buf, "_%s: .word %s", aux2->name, bufArray);
+        printf("%s%s\n", "Shit reached here? 3 - ",aux2->name);
         emit(buf);
-        aux=aux->next;
+        aux2=aux2->next;
     }
     //print_registers();
     //clear_inregister();
