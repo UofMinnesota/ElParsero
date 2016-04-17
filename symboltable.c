@@ -100,6 +100,8 @@ int insert_inRegister(char name[]){
   }
 }
 
+
+
 void insertArray(char name[], int dim){
   regist aux = arrays;
   regist prev;
@@ -110,7 +112,7 @@ void insertArray(char name[], int dim){
   aux=(regist)malloc(sizeof(struct registe));
   strcpy(aux->name,name);
   aux->next = NULL;
-  
+
   aux->place = dim;
   if(prev != NULL){
     prev-> next = aux;

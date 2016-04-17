@@ -13,7 +13,18 @@ void main()
   vector[2] = 200;
 
   b = 90;
-  a = 10;
+  if(globalint){
+    b = 4;
+    if(b){
+      b = 1;
+    }
+
+  }else{
+    b = 1;
+    if(globalint){
+      a = 12;
+    }
+  }
   a = a + 3;  /* error 2, undeclear b */
 
   g = localint / 5;

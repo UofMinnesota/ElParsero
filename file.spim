@@ -31,15 +31,31 @@ li $11, 200
 sw $11, _vector($10)
 li $11, 90
 sw $11, -20($fp)
-li $11, 10
-sw $11, -12($fp)
-lw $11, -12($fp)
-li $12, 3
-add $11, $11, $12 
-sw $11, -12($fp)
-lw $11, -8($fp)
-div $11, $11, $9
-sw $11, -16($fp)
+lw $11, _globalint
+beqz $11, lelse0
+li $12, 4
+sw $12, -20($fp)
+lw $12, -20($fp)
+beqz $12, lelse1
+li $13, 1
+sw $13, -20($fp)
+lelse1:
+j lexit0
+lelse0:
+li $13, 1
+sw $13, -20($fp)
+beqz $11, lelse1
+li $13, 12
+sw $13, -12($fp)
+lelse1:
+lexit0:
+lw $13, -12($fp)
+li $14, 3
+add $13, $13, $14 
+sw $13, -12($fp)
+lw $13, -8($fp)
+div $13, $13, $9
+sw $13, -16($fp)
 
 
 _end_main:

@@ -11,6 +11,9 @@ static int linenumber = 1;
 int cur_scope = 0;
 int is_nt_func = 0;
 int tmp_array_dim = 0;
+int ifnum = 0;
+int ifnumbegin = 0;
+int allLabel[256];
 int temp_place = 8;
 int fp_pos = 0;
 enum all_type cur_type, fn_return_type;
@@ -385,6 +388,10 @@ init_id		: ID
         }
 		;
 
+ifbegin: IF MK_LPAREN relop_expr {char buf[20];sprintf(buf,"beqz $%d, lelse%d", $3.place, ifnum++);emit(buf); ifnumbegin++;}
+      ;
+
+
 stmt_list	: stmt_list stmt
 		| stmt
 		;
@@ -395,9 +402,14 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 		| WHILE MK_LPAREN relop_expr_list MK_RPAREN stmt
 	        | FOR MK_LPAREN assign_expr_list MK_SEMICOLON relop_expr_list MK_SEMICOLON assign_expr_list MK_RPAREN stmt
 		/* | If then else here */
-		| IF MK_LPAREN relop_expr MK_RPAREN stmt ELSE stmt
+		| ifbegin MK_RPAREN stmt {char buf[20];sprintf(buf,"j lexit%d", ifnum-1); emit(buf);}ELSE {char buf[20];sprintf(buf,"lelse%d:", ifnum-1);emit(buf);} stmt
+    //exit ifelse
+      {char buf[20];sprintf(buf,"lexit%d:", --ifnum);emit(buf);}
 		/* | If statement here */
-		| IF MK_LPAREN relop_expr MK_RPAREN stmt
+		| ifbegin MK_RPAREN stmt {
+        //endif
+        char buf[20];sprintf(buf,"lelse%d:", --ifnum);emit(buf);
+    }
 		/* | read and write library calls -- note that read/write are not keywords */
 		| ID MK_LPAREN relop_expr_list MK_RPAREN	/*Function calls: need to check parameter number, type and return types.*/
 	{
@@ -430,7 +442,7 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
     }else if($1->p->is_array == 1){
       char buff[20];
 
-      
+
       char buf[20]; sprintf(buf, "sw $%d, _%s($%d)", $3.place, $1->p->id, temp_place);
       emit(buf);
 
