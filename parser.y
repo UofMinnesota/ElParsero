@@ -87,7 +87,7 @@ struct f_l{	//To get details of function arguments.
 %type <num> dim_fn dimfn1 param
 %type <func_list> param_list
 %type <func_list> relop_expr_list nonempty_relop_expr_list relop_expr relop_term relop_factor
-%type <func_list> expr term factor dim_decl cexpr mcexpr cfactor ifbegin whilebegin
+%type <func_list> expr term factor dim_decl cexpr mcexpr cfactor ifbegin whilebegin forbegin
 %type <nt_type> type
 //%type <nt_type> relop_expr_list nonempty_relop_expr_list relop_expr relop_term relop_factor
 //%type <nt_type> expr term factor dim_decl cexpr mcexpr cfactor type
@@ -394,6 +394,10 @@ ifbegin: IF {char buf[20];sprintf(buf,"test%d:", ifnum);emit(buf);}MK_LPAREN rel
 
 whilebegin: WHILE {$$.place = ifnum; char buf[20];sprintf(buf,"test%d:", ifnum++);emit(buf);}
       ;
+
+forbegin: FOR MK_LPAREN assign_expr_list MK_SEMICOLON {$$.place = ifnum; char buf[20];sprintf(buf,"test%d:", ifnum++);emit(buf);}
+      ;
+
 stmt_list	: stmt_list stmt
 		| stmt
 		;
@@ -404,7 +408,17 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 		| whilebegin MK_LPAREN relop_expr_list
     {char buf[20];sprintf(buf,"  beqz $%d, lexit%d", $3.place, $1.place);emit(buf); }MK_RPAREN stmt
     {char buf[20];sprintf(buf,"  j test%d", $1.place);emit(buf);}{char buf[20];sprintf(buf,"lexit%d:", $1.place);emit(buf);}
-	  | FOR MK_LPAREN assign_expr_list MK_SEMICOLON relop_expr_list MK_SEMICOLON assign_expr_list MK_RPAREN stmt
+	  | forbegin relop_expr_list
+     {char buf[20];sprintf(buf,"  beqz $%d, lexit%d", $2.place, $1.place);emit(buf);
+      char bufd[20];sprintf(bufd,"  j body%d", $1.place);emit(bufd);
+      {char buff[20];sprintf(buff,"inc%d:", $1.place);emit(buff);}
+    }
+     MK_SEMICOLON assign_expr_list
+     {char buf[20];sprintf(buf,"  j test%d", $1.place);emit(buf);}
+     MK_RPAREN {char buf[20];sprintf(buf,"body%d:", $1.place);emit(buf);}
+     stmt
+     {char buf[20];sprintf(buf,"  j inc%d", $1.place);emit(buf);
+     char buff[20];sprintf(buff,"lexit%d:", $1.place);emit(buff);}
 		/* | If then else here */
 		| ifbegin MK_RPAREN stmt {char buf[20];sprintf(buf,"  j lexit%d", $1.place); emit(buf);}ELSE {char buf[20];sprintf(buf,"lelse%d:", $1.place);emit(buf);} stmt
     //exit ifelse
@@ -617,10 +631,17 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
     sprintf(na, "%d", $1->const_u.ival);
 
     if(!find_inRegister(na)){
-      $1->place = insert_inRegister(na);
-      char buf[20];
-      sprintf(buf, "  li $%d, %d", $1->place, $1->const_u.ival);
-      emit(buf);
+      if($1->const_u.ival){
+        $1->place = insert_inRegister(na);
+        char buf[20];
+        sprintf(buf, "  li $%d, %d", $1->place, $1->const_u.ival);
+        emit(buf);
+      }else{
+        $1->place = insert_inRegister(na);
+        char buf[20];
+        sprintf(buf, "  li $%d, $0", $1->place);
+        emit(buf);
+      }
     }
     $1->place = insert_inRegister(na);
     $$.place = $1->place;}		/*Checking Array subscript.*/
