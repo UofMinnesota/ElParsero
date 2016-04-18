@@ -4,7 +4,7 @@ int globalint;
 
 void main()
 {
-  int localint, a = 0;
+  int localint, a;
   int g, b;
   int i;
   int localint2 = 20 - 5; /* error 1, redeclear localint */
@@ -14,15 +14,15 @@ void main()
   globalint = 100;
   localint = globalint * 20 - 5;
   vector[2] = 200;
-
-  for (i = 0; i < globalint; i= i+1){
+  i = 1;
+  for (i = 0; i < 100; i= i+1){
     a = globalint+2;
     while(a>=100){
       localint = a + 3;
 
     }
   }
-  /*while(a){
+  while(a){
     a = a+1;
     if(a == 2){
       while(globalint > 100){
@@ -48,7 +48,7 @@ void main()
     }else{
       a = a+1;
     }
-  }*/
+  }
 
   a = a +3;  /* error 2, undeclear b */
 

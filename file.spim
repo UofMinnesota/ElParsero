@@ -16,7 +16,6 @@ main:
   sw $15, 4($sp)
 
 _begin_main:
-  sw $0, -12($fp)
   li $8, 20
   li $9, 5
   sub $10, $8, $9 
@@ -30,9 +29,11 @@ _begin_main:
   li $10, 2
   li $11, 200
   sw $11, _vector($10)
+  li $11, 1
+  sw $11, -24($fp)
 test0:
   lw $11, -24($fp)
-  lw $12, _globalint
+  li $12, 100
   slt $13, $11, $12
   beqz $13, lexit0
   j body0
@@ -41,26 +42,93 @@ inc0:
   add $11, $11, $13 
   j test0
 body0:
-  add $12, $12, $10 
-  sw $12, -12($fp)
+  lw $14, _globalint
+  add $14, $14, $10 
+  sw $14, -12($fp)
 test1:
-  lw $12, -12($fp)
-  li $14, 100
-  sge $15, $12, $14
+  lw $14, -12($fp)
+  sge $15, $14, $12
   beqz $15, lexit1
   li $15, 3
-  add $12, $12, $15 
-  sw $12, -8($fp)
+  add $14, $14, $15 
+  sw $14, -8($fp)
   j test1
 lexit1:
   j inc0
 lexit0:
-  lw $12, -12($fp)
-  add $12, $12, $15 
-  sw $12, -12($fp)
-  lw $12, -8($fp)
-  div $12, $12, $9
-  sw $12, -16($fp)
+test2:
+  lw $14, -12($fp)
+  beqz $14, lexit2
+  add $14, $14, $13 
+  sw $14, -12($fp)
+test3:
+  lw $14, -12($fp)
+  seq $16, $14, $10
+  beqz $16, lelse3
+test4:
+  lw $16, _globalint
+  sgt $8, $16, $12
+  beqz $8, lexit4
+  add $16, $16, $13 
+  sw $16, _globalint
+test5:
+  seq $8, $14, $10
+  beqz $8, lelse5
+test6:
+  lw $8, _globalint
+  sgt $16, $8, $12
+  beqz $16, lexit6
+  add $8, $8, $13 
+  sw $8, _globalint
+test7:
+  seq $8, $14, $10
+  beqz $8, lelse7
+test8:
+  lw $8, _globalint
+  sgt $16, $8, $12
+  beqz $16, lexit8
+  add $8, $8, $13 
+  sw $8, _globalint
+  j test8
+lexit8:
+  add $14, $14, $13 
+  sw $14, -12($fp)
+  j lexit7
+lelse7:
+  lw $8, -12($fp)
+  add $8, $8, $13 
+  sw $8, -12($fp)
+lexit7:
+  j test6
+lexit6:
+  lw $8, -12($fp)
+  add $8, $8, $13 
+  sw $8, -12($fp)
+  j lexit5
+lelse5:
+  lw $8, -12($fp)
+  add $8, $8, $13 
+  sw $8, -12($fp)
+lexit5:
+  j test4
+lexit4:
+  lw $8, -12($fp)
+  add $8, $8, $13 
+  sw $8, -12($fp)
+  j lexit3
+lelse3:
+  lw $8, -12($fp)
+  add $8, $8, $13 
+  sw $8, -12($fp)
+lexit3:
+  j test2
+lexit2:
+  lw $8, -12($fp)
+  add $8, $8, $15 
+  sw $8, -12($fp)
+  lw $8, -8($fp)
+  div $8, $8, $9
+  sw $8, -16($fp)
 
 
 _end_main:

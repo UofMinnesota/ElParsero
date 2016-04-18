@@ -12,6 +12,7 @@ int cur_scope = 0;
 int is_nt_func = 0;
 int tmp_array_dim = 0;
 int ifnum = 0;
+int lol = 0;
 int ifnumbegin = 0;
 int allLabel[256];
 int temp_place = 8;
@@ -366,6 +367,7 @@ init_id		: ID
     emit(buf);
     delete_inregister($3.place);
   }
+
                 if($1->p->first_time==0) {
                  	printf("ID (%s) redeclared\n",$1->p->id);
 			error = 1;
@@ -395,7 +397,9 @@ ifbegin: IF {char buf[20];sprintf(buf,"test%d:", ifnum);emit(buf);}MK_LPAREN rel
 whilebegin: WHILE {$$.place = ifnum; char buf[20];sprintf(buf,"test%d:", ifnum++);emit(buf);}
       ;
 
-forbegin: FOR MK_LPAREN assign_expr_list MK_SEMICOLON {$$.place = ifnum; char buf[20];sprintf(buf,"test%d:", ifnum++);emit(buf);}
+forbegin: FOR MK_LPAREN assign_expr_list MK_SEMICOLON {$$.place = ifnum;
+
+   char buf[20];sprintf(buf,"test%d:", ifnum++);emit(buf);}
       ;
 
 stmt_list	: stmt_list stmt
@@ -456,16 +460,15 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
   if($1->p->type == type_int && $3.place < 32){ // integer
     if($1->p->scope != 0 && $1->p->is_array == 0){
       char buf[20]; sprintf(buf, "  sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
+
       delete_inregister($3.place);
     }else if($1->p->is_array == 1){
       char buff[20];
-
-
       char buf[20]; sprintf(buf, "  sw $%d, _%s($%d)", $3.place, $1->p->id, temp_place);
       emit(buf);
-
       delete_inregister($3.place);
     }else{
+
       char buf[20]; sprintf(buf, "  sw $%d, _%s", $3.place, $1->p->id);emit(buf);
       delete_inregister($3.place);
     }
@@ -478,6 +481,7 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
       delete_inregister($3.place);
     }
   }
+
 //		printf("stmt: ID = %s, type = %d, return_type = %d\n", $1->p->id, $1->p->type, $3);
 		if($1->p->type != $3.nt_type && (is_nt_func == 1)) {
 			printf("ID = %s : Incompatible return types\n", $1->p->id);
@@ -506,19 +510,20 @@ nonempty_assign_expr_list        : nonempty_assign_expr_list MK_COMMA assign_exp
                 | assign_expr
 
 assign_expr     : ID OP_ASSIGN relop_expr
-                | relop_expr
 
+                | relop_expr
+                ;
 relop_expr	: relop_term
 	{
 		$$ = $1;strcpy($$.name, $1.name);;
 //		printf("relop_expr: array arg # = %d.\n", $$.func_list_num);
 //printf("%s\n" , $1.name);
 	}
-		| relop_expr OP_OR relop_term
+		| relop_expr OP_OR relop_term {$$ = $1;strcpy($$.name, $1.name);}
 		;
 
 relop_term	: relop_factor  {$$ = $1;strcpy($$.name, $1.name);}//printf("%s\n" , $1.name);
-		| relop_term OP_AND relop_factor
+		| relop_term OP_AND relop_factor {$$ = $3;strcpy($$.name, $3.name);}
 		;
 
 relop_factor	: expr {$$ = $1;strcpy($$.name, $1.name);}//printf("%s\n" , $1.name);
@@ -636,9 +641,9 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
         char buf[20];
         sprintf(buf, "  li $%d, %d", $1->place, $1->const_u.ival);
         emit(buf);
-        $1->place = insert_inRegister(na);
-      }else{        
+      }else{
         $1->place = 0;
+
       }
     }else{
       $1->place = insert_inRegister(na);
@@ -924,7 +929,7 @@ char buf[200];
     //print_registers();
     //printf("r%d", reg->next->place);
     //delete_inregister(plac);
-    print_registers();
+    //print_registers();
     //clear_inregister();
     //printf("%s\n", "Shit reached here too");
     fclose(f);
