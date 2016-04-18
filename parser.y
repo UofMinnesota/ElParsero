@@ -364,7 +364,7 @@ init_id		: ID
     char buf[20];
     sprintf(buf, "  sw $%d, %d($fp)", $3.place, $1->p->stkPos);
     emit(buf);
-    delete_inregister(reg, $3.place);
+    delete_inregister($3.place);
   }
                 if($1->p->first_time==0) {
                  	printf("ID (%s) redeclared\n",$1->p->id);
@@ -456,7 +456,7 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
   if($1->p->type == type_int && $3.place < 32){ // integer
     if($1->p->scope != 0 && $1->p->is_array == 0){
       char buf[20]; sprintf(buf, "  sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
-      delete_inregister(reg, $3.place);
+      delete_inregister($3.place);
     }else if($1->p->is_array == 1){
       char buff[20];
 
@@ -464,18 +464,18 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
       char buf[20]; sprintf(buf, "  sw $%d, _%s($%d)", $3.place, $1->p->id, temp_place);
       emit(buf);
 
-      delete_inregister(reg, $3.place);
+      delete_inregister($3.place);
     }else{
       char buf[20]; sprintf(buf, "  sw $%d, _%s", $3.place, $1->p->id);emit(buf);
-      delete_inregister(reg, $3.place);
+      delete_inregister($3.place);
     }
   }else{ //float
     if($1->p->scope != 0){
       char buf[20]; sprintf(buf, "  s.s $f%d, %d($fp)", $3.place - 32, $1->p->stkPos);emit(buf);
-      delete_inregister(reg, $3.place);
+      delete_inregister($3.place);
     }else{
       char buf[20]; sprintf(buf, "  s.s $f%d, _%s", $3.place, $1->p->id);emit(buf);
-      delete_inregister(reg, $3.place);
+      delete_inregister($3.place);
     }
   }
 //		printf("stmt: ID = %s, type = %d, return_type = %d\n", $1->p->id, $1->p->type, $3);
@@ -527,7 +527,7 @@ relop_factor	: expr {$$ = $1;strcpy($$.name, $1.name);}//printf("%s\n" , $1.name
        auxplace = insert_inRegister(bugg);
        sprintf(buf,"  %s $%d, $%d, $%d", $2,auxplace, $1.place, $3.place);
        emit(buf);$$.place = auxplace;
-        delete_inregister(reg,auxplace);}
+        delete_inregister(auxplace);}
 		;
 
 /* what relation operators do we support ? */
@@ -636,14 +636,13 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
         char buf[20];
         sprintf(buf, "  li $%d, %d", $1->place, $1->const_u.ival);
         emit(buf);
-      }else{
         $1->place = insert_inRegister(na);
-        char buf[20];
-        sprintf(buf, "  li $%d, $0", $1->place);
-        emit(buf);
+      }else{        
+        $1->place = 0;
       }
+    }else{
+      $1->place = insert_inRegister(na);
     }
-    $1->place = insert_inRegister(na);
     $$.place = $1->place;}		/*Checking Array subscript.*/
 	//{printf("ID: %d\n", $1->const_u.ival);}
 		/* | - constant, here - is an Unary operator */
@@ -733,6 +732,7 @@ var_ref		: ID
 //		printf("var_ref: ID: %s\n", $1->p->id);
 		if($1->p->type == type_undef)
 			printf("ID (%s) undeclared.\n", $1->p->id);
+
 	}
 		| var_ref dim		/*Array.*/
 {
@@ -920,7 +920,11 @@ char buf[200];
         }
         //printf("%s\n", "Shit reached");
     }
+    //int plac= 8;
     //print_registers();
+    //printf("r%d", reg->next->place);
+    //delete_inregister(plac);
+    print_registers();
     //clear_inregister();
     //printf("%s\n", "Shit reached here too");
     fclose(f);

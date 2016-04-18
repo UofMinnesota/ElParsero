@@ -16,8 +16,7 @@ main:
   sw $15, 4($sp)
 
 _begin_main:
-  li $8, $0
-  sw $8, -12($fp)
+  sw $0, -12($fp)
   li $8, 20
   li $9, 5
   sub $10, $8, $9 
@@ -31,30 +30,37 @@ _begin_main:
   li $10, 2
   li $11, 200
   sw $11, _vector($10)
-  li $11, $0
 test0:
-  lw $12, -24($fp)
-  lw $13, _globalint
-  slt $14, $12, $13
-  beqz $14, lexit0
+  lw $11, -24($fp)
+  lw $12, _globalint
+  slt $13, $11, $12
+  beqz $13, lexit0
   j body0
 inc0:
-  li $14, 1
-  add $12, $12, $14 
+  li $13, 1
+  add $11, $11, $13 
   j test0
 body0:
-  lw $15, -12($fp)
-  add $15, $15, $8 
-  sw $15, -12($fp)
+  add $12, $12, $10 
+  sw $12, -12($fp)
+test1:
+  lw $12, -12($fp)
+  li $14, 100
+  sge $15, $12, $14
+  beqz $15, lexit1
+  li $15, 3
+  add $12, $12, $15 
+  sw $12, -8($fp)
+  j test1
+lexit1:
   j inc0
 lexit0:
-  lw $15, -12($fp)
-  li $16, 3
-  add $15, $15, $16 
-  sw $15, -12($fp)
-  lw $15, -8($fp)
-  div $15, $15, $9
-  sw $15, -16($fp)
+  lw $12, -12($fp)
+  add $12, $12, $15 
+  sw $12, -12($fp)
+  lw $12, -8($fp)
+  div $12, $12, $9
+  sw $12, -16($fp)
 
 
 _end_main:

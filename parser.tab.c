@@ -513,8 +513,8 @@ static const yytype_uint16 yyrline[] =
      489,   490,   491,   495,   501,   502,   505,   506,   508,   509,
      511,   517,   520,   521,   524,   525,   535,   536,   537,   538,
      539,   540,   543,   544,   547,   565,   574,   587,   596,   597,
-     600,   615,   619,   620,   623,   625,   628,   629,   650,   652,
-     653,   682,   684,   685,   725,   727,   729,   737,   743,   747,
+     600,   615,   619,   620,   623,   625,   628,   629,   649,   651,
+     652,   681,   683,   684,   724,   726,   728,   737,   743,   747,
      759
 };
 #endif
@@ -1772,7 +1772,7 @@ yyreduce:
     char buf[20];
     sprintf(buf, "  sw $%d, %d($fp)", (yyvsp[0].func_list).place, (yyvsp[-2].variable)->p->stkPos);
     emit(buf);
-    delete_inregister(reg, (yyvsp[0].func_list).place);
+    delete_inregister((yyvsp[0].func_list).place);
   }
                 if((yyvsp[-2].variable)->p->first_time==0) {
                  	printf("ID (%s) redeclared\n",(yyvsp[-2].variable)->p->id);
@@ -1938,7 +1938,7 @@ yyreduce:
   if((yyvsp[-3].variable)->p->type == type_int && (yyvsp[-1].func_list).place < 32){ // integer
     if((yyvsp[-3].variable)->p->scope != 0 && (yyvsp[-3].variable)->p->is_array == 0){
       char buf[20]; sprintf(buf, "  sw $%d, %d($fp)", (yyvsp[-1].func_list).place, (yyvsp[-3].variable)->p->stkPos);emit(buf);
-      delete_inregister(reg, (yyvsp[-1].func_list).place);
+      delete_inregister((yyvsp[-1].func_list).place);
     }else if((yyvsp[-3].variable)->p->is_array == 1){
       char buff[20];
 
@@ -1946,18 +1946,18 @@ yyreduce:
       char buf[20]; sprintf(buf, "  sw $%d, _%s($%d)", (yyvsp[-1].func_list).place, (yyvsp[-3].variable)->p->id, temp_place);
       emit(buf);
 
-      delete_inregister(reg, (yyvsp[-1].func_list).place);
+      delete_inregister((yyvsp[-1].func_list).place);
     }else{
       char buf[20]; sprintf(buf, "  sw $%d, _%s", (yyvsp[-1].func_list).place, (yyvsp[-3].variable)->p->id);emit(buf);
-      delete_inregister(reg, (yyvsp[-1].func_list).place);
+      delete_inregister((yyvsp[-1].func_list).place);
     }
   }else{ //float
     if((yyvsp[-3].variable)->p->scope != 0){
       char buf[20]; sprintf(buf, "  s.s $f%d, %d($fp)", (yyvsp[-1].func_list).place - 32, (yyvsp[-3].variable)->p->stkPos);emit(buf);
-      delete_inregister(reg, (yyvsp[-1].func_list).place);
+      delete_inregister((yyvsp[-1].func_list).place);
     }else{
       char buf[20]; sprintf(buf, "  s.s $f%d, _%s", (yyvsp[-1].func_list).place, (yyvsp[-3].variable)->p->id);emit(buf);
-      delete_inregister(reg, (yyvsp[-1].func_list).place);
+      delete_inregister((yyvsp[-1].func_list).place);
     }
   }
 //		printf("stmt: ID = %s, type = %d, return_type = %d\n", $1->p->id, $1->p->type, $3);
@@ -2016,7 +2016,7 @@ yyreduce:
        auxplace = insert_inRegister(bugg);
        sprintf(buf,"  %s $%d, $%d, $%d", (yyvsp[-1].variable),auxplace, (yyvsp[-2].func_list).place, (yyvsp[0].func_list).place);
        emit(buf);(yyval.func_list).place = auxplace;
-        delete_inregister(reg,auxplace);}
+        delete_inregister(auxplace);}
 #line 2021 "parser.tab.c" /* yacc.c:1646  */
     break;
 
@@ -2192,32 +2192,31 @@ yyreduce:
         char buf[20];
         sprintf(buf, "  li $%d, %d", (yyvsp[0].con_pt)->place, (yyvsp[0].con_pt)->const_u.ival);
         emit(buf);
-      }else{
         (yyvsp[0].con_pt)->place = insert_inRegister(na);
-        char buf[20];
-        sprintf(buf, "  li $%d, $0", (yyvsp[0].con_pt)->place);
-        emit(buf);
+      }else{        
+        (yyvsp[0].con_pt)->place = 0;
       }
+    }else{
+      (yyvsp[0].con_pt)->place = insert_inRegister(na);
     }
-    (yyvsp[0].con_pt)->place = insert_inRegister(na);
     (yyval.func_list).place = (yyvsp[0].con_pt)->place;}
-#line 2205 "parser.tab.c" /* yacc.c:1646  */
+#line 2204 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 128:
-#line 650 "parser.y" /* yacc.c:1646  */
+#line 649 "parser.y" /* yacc.c:1646  */
     {(yyval.func_list).nt_type = (yyvsp[0].con_pt)->con_type;}
-#line 2211 "parser.tab.c" /* yacc.c:1646  */
+#line 2210 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 129:
-#line 652 "parser.y" /* yacc.c:1646  */
+#line 651 "parser.y" /* yacc.c:1646  */
     {(yyval.func_list).nt_type = (yyvsp[0].con_pt)->con_type;}
-#line 2217 "parser.tab.c" /* yacc.c:1646  */
+#line 2216 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 130:
-#line 655 "parser.y" /* yacc.c:1646  */
+#line 654 "parser.y" /* yacc.c:1646  */
     {
 	printf("func_call-factor: %s, decl: %d, num: %d\n", (yyvsp[-3].variable)->p->id, (yyvsp[-3].variable)->p->arg_num, (yyvsp[-1].func_list).func_list_num);
 
@@ -2245,11 +2244,11 @@ yyreduce:
 	(yyval.func_list).nt_type = (yyvsp[-3].variable)->p->return_type;	/*Function return type passed to factor.*/
 	printf("factor: return type of (%s) is: %d\n", (yyvsp[-3].variable)->p->id, (yyval.func_list).nt_type);
 }
-#line 2249 "parser.tab.c" /* yacc.c:1646  */
+#line 2248 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 133:
-#line 687 "parser.y" /* yacc.c:1646  */
+#line 686 "parser.y" /* yacc.c:1646  */
     {
 
   temp_place = find_inRegister((yyvsp[0].variable)->p->id);
@@ -2288,29 +2287,30 @@ yyreduce:
 	}
 	tmp_array_dim = 0;		/*Reset global variable*/
 }
-#line 2292 "parser.tab.c" /* yacc.c:1646  */
+#line 2291 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 134:
-#line 725 "parser.y" /* yacc.c:1646  */
+#line 724 "parser.y" /* yacc.c:1646  */
     {(yyval.func_list).nt_type = (yyvsp[0].variable)->p->type;}
-#line 2298 "parser.tab.c" /* yacc.c:1646  */
+#line 2297 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 135:
-#line 727 "parser.y" /* yacc.c:1646  */
+#line 726 "parser.y" /* yacc.c:1646  */
     {(yyval.func_list).nt_type = (yyvsp[0].variable)->p->type;}
-#line 2304 "parser.tab.c" /* yacc.c:1646  */
+#line 2303 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 136:
-#line 730 "parser.y" /* yacc.c:1646  */
+#line 729 "parser.y" /* yacc.c:1646  */
     {
 
 		(yyval.variable) = (yyvsp[0].variable);
 //		printf("var_ref: ID: %s\n", $1->p->id);
 		if((yyvsp[0].variable)->p->type == type_undef)
 			printf("ID (%s) undeclared.\n", (yyvsp[0].variable)->p->id);
+
 	}
 #line 2316 "parser.tab.c" /* yacc.c:1646  */
     break;
@@ -2730,7 +2730,11 @@ char buf[200];
         }
         //printf("%s\n", "Shit reached");
     }
+    //int plac= 8;
     //print_registers();
+    //printf("r%d", reg->next->place);
+    //delete_inregister(plac);
+    print_registers();
     //clear_inregister();
     //printf("%s\n", "Shit reached here too");
     fclose(f);

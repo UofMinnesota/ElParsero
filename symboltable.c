@@ -10,7 +10,7 @@ int getEmptyReg(int floatOffset){
       empty++;
       if(empty > 16 + floatOffset){
         empty = reg->place + floatOffset;
-        delete_inregister(reg, reg->place + floatOffset);
+        delete_inregister(reg->place + floatOffset);
         empty_reg[empty] = 1;
         return empty;
       }
@@ -19,21 +19,27 @@ int getEmptyReg(int floatOffset){
   return empty;
 }
 
-regist delete_inregister(regist currP, int value){
-  /* See if we are at end of list. */
-  if (currP == NULL)
-    return NULL;
+void delete_inregister(int place){
+  if (reg == NULL)
+    return;
 
-  if (currP->place == value) {
-    regist tempNextP;
-    tempNextP = currP->next;
-    empty_reg[value] = 0;
-    free(currP);
-    return tempNextP;
+  regist aux = reg;
+  regist prev = NULL;
+  while(aux != NULL){
+    if (aux->place == place) {
+      if(prev == NULL){
+        reg = reg->next;
+      }else{
+        prev->next = aux->next;
+      }
+      empty_reg[place] = 0;
+      free(aux);
+      return;
+    }
+    prev = aux;
+    aux = aux->next;
   }
-
-  currP->next = delete_inregister(currP->next, value);
-  return currP;
+  return;
 }
 
 void clear_inregister(){
