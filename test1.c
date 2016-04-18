@@ -14,8 +14,17 @@ void main()
   localint = globalint * 20 - 5;
   vector[2] = 200;
 
+  while(localint2 == 3){
+    a = a + 1;
+    if(globalint == 4){
+      b = 1;
+    }else{
+      b = 3;
+    }
+  }
 
-  if(globalint && b){
+
+  if(globalint){
     b = 4;
     if(localint == 3){
       b = 8;

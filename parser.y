@@ -87,7 +87,7 @@ struct f_l{	//To get details of function arguments.
 %type <num> dim_fn dimfn1 param
 %type <func_list> param_list
 %type <func_list> relop_expr_list nonempty_relop_expr_list relop_expr relop_term relop_factor
-%type <func_list> expr term factor dim_decl cexpr mcexpr cfactor ifbegin
+%type <func_list> expr term factor dim_decl cexpr mcexpr cfactor ifbegin whilebegin
 %type <nt_type> type
 //%type <nt_type> relop_expr_list nonempty_relop_expr_list relop_expr relop_term relop_factor
 //%type <nt_type> expr term factor dim_decl cexpr mcexpr cfactor type
@@ -388,10 +388,12 @@ init_id		: ID
         }
 		;
 
-ifbegin: IF MK_LPAREN relop_expr {$$.place = ifnum; char buf[20];sprintf(buf,"  beqz $%d, lelse%d", $3.place, ifnum++);emit(buf); }
+ifbegin: IF {char buf[20];sprintf(buf,"test%d:", ifnum);emit(buf);}MK_LPAREN relop_expr
+            {$$.place = ifnum; char buf[20];sprintf(buf,"  beqz $%d, lelse%d", $4.place, ifnum++);emit(buf); }
       ;
 
-
+whilebegin: WHILE {$$.place = ifnum; char buf[20];sprintf(buf,"test%d:", ifnum++);emit(buf);}
+      ;
 stmt_list	: stmt_list stmt
 		| stmt
 		;
@@ -399,8 +401,10 @@ stmt_list	: stmt_list stmt
 stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} MK_RBRACE
 /*Vineeth: Addition for stmt like while(), if() etc.*/
 		/* | While Statement here */
-		| WHILE MK_LPAREN relop_expr_list MK_RPAREN stmt
-	        | FOR MK_LPAREN assign_expr_list MK_SEMICOLON relop_expr_list MK_SEMICOLON assign_expr_list MK_RPAREN stmt
+		| whilebegin MK_LPAREN relop_expr_list
+    {char buf[20];sprintf(buf,"  beqz $%d, lexit%d", $3.place, $1.place);emit(buf); }MK_RPAREN stmt
+    {char buf[20];sprintf(buf,"  j test%d", $1.place);emit(buf);}{char buf[20];sprintf(buf,"lexit%d:", $1.place);emit(buf);}
+	  | FOR MK_LPAREN assign_expr_list MK_SEMICOLON relop_expr_list MK_SEMICOLON assign_expr_list MK_RPAREN stmt
 		/* | If then else here */
 		| ifbegin MK_RPAREN stmt {char buf[20];sprintf(buf,"  j lexit%d", $1.place); emit(buf);}ELSE {char buf[20];sprintf(buf,"lelse%d:", $1.place);emit(buf);} stmt
     //exit ifelse
