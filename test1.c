@@ -14,7 +14,7 @@ void main()
   globalint = 100;
   localint = globalint * 20 - 5;
   vector[2] = 200;
-  i = 1;
+  i = 0;
   for (i = 0; i < 100; i= i+1){
     a = globalint+2;
     while(a>=100){
