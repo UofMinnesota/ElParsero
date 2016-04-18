@@ -113,14 +113,14 @@ void insertArray(char name[], int dim){
   arrCont++;
   registr aux = arrays;
   registr prev = NULL;
-  printf("ok %s --- %d\n", aux->name, dim);
+  //printf("ok %s --- %d\n", aux->name, dim);
   //prev=(registr)malloc(sizeof(struct registre));
   while(aux!=NULL){
-    printf("ok %s --- %d\n", aux->name, dim);
+    //printf("ok %s --- %d\n", aux->name, dim);
       prev = aux;
       aux=aux->next;
   }
-  printf("ok2 %s --- %d\n", aux->name, dim);
+  //printf("ok2 %s --- %d\n", aux->name, dim);
   aux=(registr)malloc(sizeof(struct registre));
   aux->flago = 5;
   aux->next = NULL;
@@ -133,7 +133,7 @@ void insertArray(char name[], int dim){
            ) ) ){
              int u = 0;
              int i,f = 0;
-    printf("ay rodado%s\n", aux->name);
+    //printf("ay rodado%s\n", aux->name);
     for(i = 0; i < 32; ++i) {
         f |= (((aux->flago >> i) & 1 ^ (!0x0*-1>>i)&1) ^ u) << i;
         u = ((aux->flago >> i) & 1 & (-1>>i)&1)|((!(!aux->flago)*-1>>i)&1 & u)|(u & (aux->flago >> i) & 1);

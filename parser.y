@@ -12,7 +12,7 @@ int cur_scope = 0;
 int is_nt_func = 0;
 int tmp_array_dim = 0;
 int ifnum = 0;
-int lol = 0;
+int m = 1;
 int ifnumbegin = 0;
 int allLabel[256];
 int temp_place = 8;
@@ -37,6 +37,7 @@ struct f_l{	//To get details of function arguments.
     int func_arg_type[256];
     enum all_type nt_type;
     int place;
+    int is_lib_func;
 };
 %}
 
@@ -362,10 +363,12 @@ init_id		: ID
   fp_pos -= 4;
   $1->p->stkPos = fp_pos;
   if($1->p->scope != 0 && $1->p->is_array == 0){
-    char buf[20];
-    sprintf(buf, "  sw $%d, %d($fp)", $3.place, $1->p->stkPos);
-    emit(buf);
-    delete_inregister($3.place);
+    if($3.place != type_func && !$3.is_lib_func){
+      char buf[20];
+      sprintf(buf, "  sw $%d, %d($fp)", $3.place, $1->p->stkPos);
+      emit(buf);
+      delete_inregister($3.place);
+    }
   }
 
                 if($1->p->first_time==0) {
@@ -435,7 +438,8 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 		/* | read and write library calls -- note that read/write are not keywords */
 		| ID MK_LPAREN relop_expr_list MK_RPAREN	/*Function calls: need to check parameter number, type and return types.*/
 	{
-	printf("func_call-stmt: %s, decl: %d, num: %d\n", $1->p->id, $1->p->arg_num, $3.func_list_num);
+	//printf("func_call-stmt: %s, decl: %d, num: %d\n", $1->p->id, $1->p->arg_num, $3.func_list_num);
+  //printf("func_call-stmt: %s, decl: %s, %d\n", $1->p->id, $3.name, $3.place);
 
 //	print_func_details($3);
 
@@ -458,10 +462,16 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 		| var_ref OP_ASSIGN relop_expr MK_SEMICOLON
 	{				/*Function return type comparison goes here?*/
   if($1->p->type == type_int && $3.place < 32){ // integer
-    if($1->p->scope != 0 && $1->p->is_array == 0){
-      char buf[20]; sprintf(buf, "  sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
+    if($1->p->scope != 0 && $1->p->is_array == 0 && !$3.is_lib_func){
+      if($3.place != type_func){
+        char buf[20]; sprintf(buf, "  sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
+        delete_inregister($3.place);
+      }else{
+        char buf[20]; sprintf(buf, "  li $v0, 5");emit(buf);
+        char buff[20]; sprintf(buff, "  syscall");emit(buff);
+        char bufff[20]; sprintf(bufff, "  sw $v0, %d($fp)", $1->p->stkPos);emit(bufff);
 
-      delete_inregister($3.place);
+      }
     }else if($1->p->is_array == 1){
       char buff[20];
       char buf[20]; sprintf(buf, "  sw $%d, _%s($%d)", $3.place, $1->p->id, temp_place);
@@ -636,14 +646,27 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
     sprintf(na, "%d", $1->const_u.ival);
 
     if(!find_inRegister(na)){
-      if($1->const_u.ival){
-        $1->place = insert_inRegister(na);
-        char buf[20];
-        sprintf(buf, "  li $%d, %d", $1->place, $1->const_u.ival);
-        emit(buf);
+      if($1->con_type != -1){
+        if($1->const_u.ival){
+          $1->place = insert_inRegister(na);
+          char buf[20];
+          sprintf(buf, "  li $%d, %d", $1->place, $1->const_u.ival);
+          emit(buf);
+        }else{
+          $1->place = 0;
+        }
       }else{
-        $1->place = 0;
-
+        $1->place = insert_inRegister(na);
+        char buff[20];
+        sprintf(buff, "  li $v0, 4");
+        emit(buff);
+        char buf[20];
+        strcpy(strings[m], $1->const_u.sc);
+        sprintf(buf, "  la $a0, m%d", m++);
+        emit(buf);
+        char bufff[20];
+        sprintf(bufff, "  syscall");
+        emit(bufff);
       }
     }else{
       $1->place = insert_inRegister(na);
@@ -681,6 +704,10 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 		}
 	}
 	$$.nt_type = $1->p->return_type;	/*Function return type passed to factor.*/
+  $$.place = type_func;
+  if($1->p->id == "read" || $1->p->id == "write"){
+    $$.is_lib_func = 1;
+  }
 	printf("factor: return type of (%s) is: %d\n", $1->p->id, $$.nt_type);
 }
 		| OP_NOT ID MK_LPAREN relop_expr_list MK_RPAREN
@@ -925,12 +952,15 @@ char buf[200];
         }
         //printf("%s\n", "Shit reached");
     }
-    //int plac= 8;
+    char buf[20];
+    m--;
+    while(m > 0){
+      sprintf(buf,"m%d: .asciiz %s", m, strings[m]);
+      emit(buf);
+      m--;
+    }
     //print_registers();
-    //printf("r%d", reg->next->place);
-    //delete_inregister(plac);
-    //print_registers();
-    //clear_inregister();
+    clear_inregister();
     //printf("%s\n", "Shit reached here too");
     fclose(f);
     return 0;

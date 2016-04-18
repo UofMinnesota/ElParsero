@@ -14,45 +14,9 @@ void main()
   globalint = 100;
   localint = globalint * 20 - 5;
   vector[2] = 200;
-  i = 0;
-  for (i = 0; i < 100; i= i+1){
-    a = globalint+2;
-    while(a>=100){
-      localint = a + 3;
-
-    }
-  }
-  while(a){
-    a = a+1;
-    if(a == 2){
-      while(globalint > 100){
-        globalint = globalint + 1;
-        if(a == 2){
-          while(globalint > 100){
-            globalint = globalint + 1;
-            if(a == 2){
-              while(globalint > 100){
-                globalint = globalint + 1;
-              }
-              a = a+1;
-            }else{
-              a = a+1;
-            }
-          }
-          a = a+1;
-        }else{
-          a = a+1;
-        }
-      }
-      a = a+1;
-    }else{
-      a = a+1;
-    }
-  }
-
-  a = a +3;  /* error 2, undeclear b */
-
-  g = localint / 5;
-
+  write("hola mundo malo");
+  write("adios mundo malo");
+  a = read();
+  b = read();
   return;
 }

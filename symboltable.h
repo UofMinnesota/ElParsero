@@ -51,7 +51,7 @@ regist reg;
 registr arrays ;
 
 int empty_reg[64];
-
+char strings[256][256];
 /* Function definitions */
 int hash(char *key);
 int arrCont;
