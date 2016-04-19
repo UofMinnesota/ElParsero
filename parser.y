@@ -793,7 +793,51 @@ struct_tail	: MK_DOT ID
 %%
 #include "lex.yy.c"
 FILE *f;
+void generateFuncio(char * func)
+{
+char buf[2000];
+sprintf(buf, "%s:\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n_begin_%s:",func,
+	"  sw $ra, 0($sp)",
+	"  sw $fp, -4($sp)",
+	"  add $fp, $sp, -4",
+	"  add $sp, $sp, -8",
+	"  lw $2, _framesize_main",
+	"  sub $sp, $sp, $2",
+	"  sw $8, 32($sp)",
+	"  sw $9, 28($sp)",
+	"  sw $10, 24($sp)",
+	"  sw $11, 20($sp)",
+	"  sw $12, 16($sp)",
+	"  sw $13, 12($sp)",
+	"  sw $14, 8($sp)",
+	"  sw $15, 4($sp)",
+ func
+);
+emit(buf);
+}
 
+void endFuncio(char * func)
+{
+char buf[2000];
+sprintf(buf, "\n\n_end_%s:\n%s%s%s%s%s%s%s%s%s%s%s%s%s",
+func,
+"	lw $8, 32($sp)\n",
+"	lw $9, 28($sp)\n",
+"	lw $10, 24($sp)\n",
+"	lw $11, 20($sp)\n",
+"	lw $12, 16($sp)\n",
+"	lw $13, 12($sp)\n",
+"	lw $14, 8($sp)\n",
+"	lw $15, 4($sp)\n",
+"	lw $ra, 4($fp)\n",
+"	add $sp, $fp, 4\n",
+"	lw $fp, 0($fp)\n",
+"	li $v0, 10\n",
+"	syscall\n"
+
+);
+emit(buf);
+}
 void generateMain()
 {
 char buf[2000];

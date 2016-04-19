@@ -2,6 +2,12 @@
 
 int globalint;
 
+void ElFuegoQueArde()
+{
+  int x = 0;
+  return;
+}
+
 void main()
 {
   int localint, a;
