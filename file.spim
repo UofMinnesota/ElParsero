@@ -1,4 +1,22 @@
 .text
+ElFuegoQueArde:
+  sw $ra, 0($sp)
+  sw $fp, -4($sp)
+  add $fp, $sp, -4
+  add $sp, $sp, -8
+  lw $2, _framesize_ElFuegoQueArde
+  sub $sp, $sp, $2
+  sw $8, 32($sp)
+  sw $9, 28($sp)
+  sw $10, 24($sp)
+  sw $11, 20($sp)
+  sw $12, 16($sp)
+  sw $13, 12($sp)
+  sw $14, 8($sp)
+  sw $15, 4($sp)
+
+_begin_ElFuegoQueArde:
+  sw $0, -8($fp)
 main:
   sw $ra, 0($sp)
   sw $fp, -4($sp)
@@ -16,11 +34,10 @@ main:
   sw $15, 4($sp)
 
 _begin_main:
-  sw $0, -8($fp)
   li $8, 20
   li $9, 5
   sub $10, $8, $9 
-  sw $10, -32($fp)
+  sw $10, -36($fp)
   li $10, 100
   sw $10, _globalint
   lw $10, _globalint
@@ -30,29 +47,24 @@ _begin_main:
   li $10, 2
   li $11, 200
   sw $11, _vector($10)
+test0:
+  lw $11, _globalint
+  beqz $11, lelse0
+  lw $12, -12($fp)
+  slt $13, $12, $10
+  beqz $13, lelse0
+  lw $14, -36($fp)
+  li $15, 1
+  sne $16, $14, $15
+  beqz $16, lelse0
+  sw $15, -36($fp)
+lelse0:
   li $v0, 4
   la $a0, m1
   syscall
   li $v0, 4
   la $a0, m2
   syscall
-  li $13, 1
-  sw $13, -28($fp)
-test0:
-  lw $14, -28($fp)
-  li $15, 4
-  sle $16, $14, $15
-  beqz $16, lexit0
-  j body0
-inc0:
-  add $14, $14, $13 
-  sw $14, -28($fp)
-  j test0
-body0:
-  add $14, $14, $13 
-  sw $14, _globalint
-  j inc0
-lexit0:
   li $v0, 5
   syscall
   sw $v0, -16($fp)

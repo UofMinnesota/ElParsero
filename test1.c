@@ -8,11 +8,12 @@ void ElFuegoQueArde()
   return;
 }
 
+
 void main()
 {
   int localint, a;
   int g, b;
-  int i;
+  int i, j;
   int localint2 = 20 - 5; /* error 1, redeclear localint */
   int vector[5];
   int buceta2[9];
@@ -20,14 +21,13 @@ void main()
   globalint = 100;
   localint = globalint * 20 - 5;
   vector[2] = 200;
-  write("hola mundo malo");
-  write("adios mundo malo");
 
-  for(i = 1; i <= 4; i = i + 1)
-  {
-    globalint = i + 1;
+  if (globalint && localint < 2 && localint2 != 1){
+    localint2 = 1;
   }
 
+  write("hola mundo malo");
+  write("adios mundo malo");
   a = read();
   b = read();
   return;

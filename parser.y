@@ -13,6 +13,7 @@ int is_nt_func = 0;
 int tmp_array_dim = 0;
 int ifnum = 0;
 int m = 1;
+int isif = 0;
 int ifnumbegin = 0;
 int allLabel[256];
 int temp_place = 8;
@@ -113,11 +114,11 @@ global_decl_list: global_decl_list global_decl
 		;
 
 global_decl	: decl_list function_decl
-		| function_decl
+		| function_decl {}
     ;
 
 /*Vineeth: Scoping rule is not correct!*/
-function_decl	: type ID MK_LPAREN param_list MK_RPAREN MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} MK_RBRACE
+function_decl	: type ID MK_LPAREN param_list MK_RPAREN MK_LBRACE {generateFuncio($2->p->id);cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} MK_RBRACE
 	{
 //	printf("func_defn_x: %s, decl: %d, num: %d\n", $2->p->id, $2->p->arg_num, $4.func_list_num);
 	if(($1 != $2->p->return_type) && ($2->p->is_lib_func == 0) && ($2->p->type == type_func)) {	/*Comparing with declaration.*/
@@ -393,16 +394,16 @@ init_id		: ID
         }
 		;
 
-ifbegin: IF {char buf[20];sprintf(buf,"test%d:", ifnum);emit(buf);}MK_LPAREN relop_expr
-            {$$.place = ifnum; char buf[20];sprintf(buf,"  beqz $%d, lelse%d", $4.place, ifnum++);emit(buf); }
+ifbegin: IF {isif = 1; char buf[20];sprintf(buf,"test%d:", ifnum);emit(buf);}MK_LPAREN relop_expr
+            {isif = 0; $$.place = ifnum; ifnum++;}
       ;
 
-whilebegin: WHILE {$$.place = ifnum; char buf[20];sprintf(buf,"test%d:", ifnum++);emit(buf);}
+whilebegin: WHILE {$$.place = ifnum; char buf[20];sprintf(buf,"test%d:", ifnum);emit(buf); isif = 1;}
       ;
 
 forbegin: FOR MK_LPAREN assign_expr_list MK_SEMICOLON {$$.place = ifnum;
 
-   char buf[20];sprintf(buf,"test%d:", ifnum++);emit(buf);}
+   char buf[20];sprintf(buf,"test%d:", ifnum);emit(buf); isif = 1;}
       ;
 
 stmt_list	: stmt_list stmt
@@ -413,10 +414,10 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 /*Vineeth: Addition for stmt like while(), if() etc.*/
 		/* | While Statement here */
 		| whilebegin MK_LPAREN relop_expr_list
-    {char buf[20];sprintf(buf,"  beqz $%d, lexit%d", $3.place, $1.place);emit(buf); }MK_RPAREN stmt
+    {ifnum++; isif = 0;}MK_RPAREN stmt
     {char buf[20];sprintf(buf,"  j test%d", $1.place);emit(buf);}{char buf[20];sprintf(buf,"lexit%d:", $1.place);emit(buf);}
 	  | forbegin relop_expr_list
-     {char buf[20];sprintf(buf,"  beqz $%d, lexit%d", $2.place, $1.place);emit(buf);
+     {isif = 0; ifnum++;
       char bufd[20];sprintf(bufd,"  j body%d", $1.place);emit(bufd);
       {char buff[20];sprintf(buff,"inc%d:", $1.place);emit(buff);}
     }
@@ -525,6 +526,7 @@ assign_expr     : ID OP_ASSIGN relop_expr
   char buf[20];
   sprintf(buf, "  sw $%d, %d($fp)", $3.place, $1->p->stkPos);
   emit(buf);
+  delete_inregister($3.place);
 }
 
                 | relop_expr
@@ -535,11 +537,25 @@ relop_expr	: relop_term
 //		printf("relop_expr: array arg # = %d.\n", $$.func_list_num);
 //printf("%s\n" , $1.name);
 	}
-		| relop_expr OP_OR relop_term {$$ = $1;strcpy($$.name, $1.name);}
+		| relop_expr OP_OR relop_term {$$ = $1;strcpy($$.name, $1.name);
+
+    }
 		;
 
-relop_term	: relop_factor  {$$ = $1;strcpy($$.name, $1.name);}//printf("%s\n" , $1.name);
-		| relop_term OP_AND relop_factor {$$ = $3;strcpy($$.name, $3.name);}
+relop_term	: relop_factor  {
+    $$ = $1;strcpy($$.name, $1.name);
+    if(isif){
+      char buff[20];sprintf(buff,"  beqz $%d, lelse%d", $1.place, ifnum);emit(buff);
+    }
+    }//
+
+    | relop_term OP_AND relop_factor {
+      $$ = $3;strcpy($$.name, $3.name);
+      if(isif){
+        char buff[20];sprintf(buff,"  beqz $%d, lelse%d", $3.place, ifnum);emit(buff);
+      }
+      }//printf("%d:" , $1.place);printf("%d\n" , $3.place);
+
 		;
 
 relop_factor	: expr {$$ = $1;strcpy($$.name, $1.name);}//printf("%s\n" , $1.name);
@@ -548,7 +564,11 @@ relop_factor	: expr {$$ = $1;strcpy($$.name, $1.name);}//printf("%s\n" , $1.name
        auxplace = insert_inRegister(bugg);
        sprintf(buf,"  %s $%d, $%d, $%d", $2,auxplace, $1.place, $3.place);
        emit(buf);$$.place = auxplace;
-        delete_inregister(auxplace);}
+       if(isif){
+         //char buff[20];sprintf(buff,"  beqz $%d, lelse%d", auxplace, ifnum);emit(buff);
+       }
+      strcpy($$.name, $1.name);
+      }
 		;
 
 /* what relation operators do we support ? */
@@ -799,15 +819,15 @@ struct_tail	: MK_DOT ID
 %%
 #include "lex.yy.c"
 FILE *f;
-void generateFuncio(char * func)
+void generateFuncio(char *func)
 {
 char buf[2000];
-sprintf(buf, "%s:\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n_begin_%s:",func,
+sprintf(buf, "%s:\n%s\n%s\n%s\n%s\n%s%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n_begin_%s:",func,
 	"  sw $ra, 0($sp)",
 	"  sw $fp, -4($sp)",
 	"  add $fp, $sp, -4",
 	"  add $sp, $sp, -8",
-	"  lw $2, _framesize_main",
+	"  lw $2, _framesize_", func,
 	"  sub $sp, $sp, $2",
 	"  sw $8, 32($sp)",
 	"  sw $9, 28($sp)",
@@ -900,7 +920,7 @@ int main (int argc, char *argv[])
         yyin = fopen(argv[1],"r");
     else
         yyin=stdin;
-    generateMain();
+    //generateMain();
     registr aux = arrays;
     while(aux!=NULL){
       //printf("ok87-\n");
@@ -1026,7 +1046,7 @@ int main (int argc, char *argv[])
         yyin = fopen(argv[1],"r");
     else
         yyin=stdin;
-    generateMain();
+    //generateMain();
     yyparse();
     endMain();
     //print_symtab();
