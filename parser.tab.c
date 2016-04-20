@@ -2677,7 +2677,7 @@ emit(buf);
 void endFuncio(char * func)
 {
 char buf[2000];
-sprintf(buf, "\n\n_end_%s:\n%s%s%s%s%s%s%s%s%s%s%s%s%s",
+sprintf(buf, "\n\n_end_%s:\n%s%s%s%s%s%s%s%s%s%s%s",
 func,
 "	lw $8, 32($sp)\n",
 "	lw $9, 28($sp)\n",
@@ -2689,13 +2689,18 @@ func,
 "	lw $15, 4($sp)\n",
 "	lw $ra, 4($fp)\n",
 "	add $sp, $fp, 4\n",
-"	lw $fp, 0($fp)\n",
-"	li $v0, 10\n",
-"	syscall\n"
+"	lw $fp, 0($fp)"
+
 
 );
 emit(buf);
-emit(".data");
+if(strcmp(func, "main")){
+  emit("	jr $ra");
+}else{
+  emit("  li $v0, 10");
+  emit("	syscall");
+}
+emit("\n.data");
 char buff[20];
 sprintf(buff,"_framesize_%s: .word 36", func);
 emit(buff);

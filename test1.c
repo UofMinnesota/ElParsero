@@ -5,7 +5,7 @@ int globalint;
 void ElFuegoQueArde()
 {
   int b,x = 0;
-  b = 3+ 2;
+  b = 3+2;
   return;
 }
 

@@ -36,8 +36,7 @@ _end_ElFuegoQueArde:
 	lw $ra, 4($fp)
 	add $sp, $fp, 4
 	lw $fp, 0($fp)
-	li $v0, 10
-	syscall
+	jr $ra
 
 .data
 _framesize_ElFuegoQueArde: .word 36
@@ -110,7 +109,7 @@ _end_main:
 	lw $ra, 4($fp)
 	add $sp, $fp, 4
 	lw $fp, 0($fp)
-	li $v0, 10
+  li $v0, 10
 	syscall
 
 .data
