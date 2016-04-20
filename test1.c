@@ -22,6 +22,12 @@ void main()
   vector[2] = 200;
   write("hola mundo malo");
   write("adios mundo malo");
+
+  for(i = 1; i <= 4; i = i + 1)
+  {
+    globalint = i + 1;
+  }
+
   a = read();
   b = read();
   return;

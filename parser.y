@@ -520,6 +520,12 @@ nonempty_assign_expr_list        : nonempty_assign_expr_list MK_COMMA assign_exp
                 | assign_expr
 
 assign_expr     : ID OP_ASSIGN relop_expr
+{
+  //char bufff[20]; sprintf(bufff, "  sw $v0, %d($fp)", $1->p->stkPos);emit(bufff);
+  char buf[20];
+  sprintf(buf, "  sw $%d, %d($fp)", $3.place, $1->p->stkPos);
+  emit(buf);
+}
 
                 | relop_expr
                 ;

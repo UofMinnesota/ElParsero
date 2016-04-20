@@ -36,6 +36,23 @@ _begin_main:
   li $v0, 4
   la $a0, m2
   syscall
+  li $13, 1
+  sw $13, -28($fp)
+test0:
+  lw $14, -28($fp)
+  li $15, 4
+  sle $16, $14, $15
+  beqz $16, lexit0
+  j body0
+inc0:
+  add $14, $14, $13 
+  sw $14, -28($fp)
+  j test0
+body0:
+  add $14, $14, $13 
+  sw $14, _globalint
+  j inc0
+lexit0:
   li $v0, 5
   syscall
   sw $v0, -16($fp)
