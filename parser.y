@@ -140,6 +140,7 @@ function_decl	: type ID MK_LPAREN param_list MK_RPAREN MK_LBRACE {generateFuncio
 	}
 
 	check_func_details($2, $4);
+  endFuncio($2->p->id);
 	}
 //Vineeth: Function declarations. The above ones are function definitions
 		| type ID MK_LPAREN param_list MK_RPAREN MK_SEMICOLON /*Scope = 0 and populating function parameters*/
@@ -821,6 +822,7 @@ struct_tail	: MK_DOT ID
 FILE *f;
 void generateFuncio(char *func)
 {
+  emit("\n.text");
 char buf[2000];
 sprintf(buf, "%s:\n%s\n%s\n%s\n%s\n%s%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n_begin_%s:",func,
 	"  sw $ra, 0($sp)",
@@ -863,6 +865,10 @@ func,
 
 );
 emit(buf);
+emit(".data");
+char buff[20];
+sprintf(buff,"_framesize_%s: .word 36", func);
+emit(buff);
 }
 void generateMain()
 {
@@ -908,6 +914,7 @@ sprintf(buf, "\n\n%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
 
 );
 emit(buf);
+
 }
 
 int main (int argc, char *argv[])
@@ -915,12 +922,12 @@ int main (int argc, char *argv[])
     init_symtab();
     f = fopen("file.spim", "w");
     printf("Symbol Table initialized\n");
-    emit(".text");
+
     if(argc>0)
         yyin = fopen(argv[1],"r");
     else
         yyin=stdin;
-    //generateMain();
+
     registr aux = arrays;
     while(aux!=NULL){
       //printf("ok87-\n");
@@ -934,7 +941,7 @@ int main (int argc, char *argv[])
       //prev = aux;
         aux=(registr *)aux->next;
     }
-    endMain();
+    //endMain();
     //print_symtab();
     if (error == 1)
 	printf("%s\n", "Parsing completed. Errors found.");
@@ -946,7 +953,7 @@ int main (int argc, char *argv[])
           aux=(registr *)aux->next;
       }
     	printf("%s\n", "Parsing completed. No errors found.");
-      emit("\n.data");
+
       char buf[20];
       ptr p;
       int i, value = 0;
@@ -961,8 +968,7 @@ int main (int argc, char *argv[])
               p=p->next;
           }
       }
-      sprintf(buf, "_framesize_main: .word 36", 2, 2);
-      emit(buf);
+
 
     }
 //    print_symtab();
@@ -1046,7 +1052,7 @@ int main (int argc, char *argv[])
         yyin = fopen(argv[1],"r");
     else
         yyin=stdin;
-    //generateMain();
+
     yyparse();
     endMain();
     //print_symtab();

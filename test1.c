@@ -4,7 +4,8 @@ int globalint;
 
 void ElFuegoQueArde()
 {
-  int x = 0;
+  int b,x = 0;
+  b = 3+ 2;
   return;
 }
 
