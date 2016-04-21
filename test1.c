@@ -16,22 +16,23 @@ int ElFuegoQueArde(int j, int i, int r, int vec)
 void main()
 {
   int localint, a;
-  int b, g = 0;
+  int b, g;
   int i, j;
   int localint2 = 20 - 5; /* error 1,
   redeclear localint */
   int vector[5];
-  int buceta2[9];
+  int vector2[3][2][2];
   int vector32[8];
 
   globalint = 100;
   vector[2] = 200;
+  vector2[1] = 3;
   localint = globalint * 20 - 5;
 
   globalint = vector[2];
 
   vector[1] = globalint;
-  g = ElFuegoQueArde(globalint,g, localint, g);
+  g = ElFuegoQueArde(globalint, vector[2], localint, g);
 
   return;
 }

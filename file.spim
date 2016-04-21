@@ -74,7 +74,6 @@ _begin_main:
   move $9, $a1
   move $10, $a2
   move $11, $a3
-  sw $0, -28($fp)
   li $14, 20
   li $15, 5
   sub $16, $14, $15 
@@ -86,25 +85,29 @@ _begin_main:
   li $16, 2
   li $10, 200
   sw $10, _vector($16)
-  lw $10, _globalint
-  mul $10, $10, $14
-  sub $10, $10, $15 
-  sw $10, -16($fp)
-  li $10, 2
-  lw $16, vector($10)
-  sw $16, _globalint
   li $10, 1
+  li $16, 3
+  sw $16, _vector2($10)
   lw $16, _globalint
-  sw $16, _vector($16)
-  lw $16, _globalint
-  move $a0, $16
-  lw $11, -28($fp)
-  move $a1, $11
-  lw $8, -16($fp)
-  move $a2, $8
-  move $a3, $11
+  mul $16, $16, $14
+  sub $16, $16, $15 
+  sw $16, -16($fp)
+  li $16, 2
+  lw $11, _vector($16)
+  sw $11, _globalint
+  lw $11, _globalint
+  sw $11, _vector($10)
+  lw $11, _globalint
+  move $a0, $11
+  li $16, 2
+  lw $8, _vector($16)
+  move $a1, $8
+  lw $11, -16($fp)
+  move $a2, $11
+  lw $12, -28($fp)
+  move $a3, $12
   jal ElFuegoQueArde
-  move $11, $v0
+  move $12, $v0
 
 
 _end_main:
@@ -126,5 +129,5 @@ _end_main:
 _framesize_main: .word 36
 _globalint: .word 0
 _vector: .word 0, 0, 0, 0, 0
-_buceta2: .word 0, 0, 0, 0, 0, 0, 0, 0, 0
+_vector2: .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 _vector32: .word 0, 0, 0, 0, 0, 0, 0, 0

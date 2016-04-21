@@ -113,14 +113,12 @@ void insertArray(char name[], int dim){
   arrCont++;
   registr aux = arrays;
   registr prev = NULL;
-  //printf("ok %s --- %d\n", aux->name, dim);
-  //prev=(registr)malloc(sizeof(struct registre));
+
   while(aux!=NULL){
-    //printf("ok %s --- %d\n", aux->name, dim);
       prev = aux;
       aux=aux->next;
   }
-  //printf("ok2 %s --- %d\n", aux->name, dim);
+
   aux=(registr)malloc(sizeof(struct registre));
   aux->flago = 5;
   aux->next = NULL;
