@@ -463,16 +463,18 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 	}
 		| var_ref OP_ASSIGN relop_expr MK_SEMICOLON
 	{				/*Function return type comparison goes here?*/
-  if($1->p->type == type_int && $3.place < 32){ // integer
-    if($1->p->scope != 0 && $1->p->is_array == 0 && !$3.is_lib_func){
-      if($3.place != type_func){
-        char buf[20]; sprintf(buf, "  sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
-        delete_inregister($3.place);
-      }else{
+  if($1->p->type == type_int && $3.place < 32){ // integer miguel
+    if($1->p->scope != 0 && $1->p->is_array == 0){
+      if($3.is_lib_func){
         char buf[20]; sprintf(buf, "  li $v0, 5");emit(buf);
         char buff[20]; sprintf(buff, "  syscall");emit(buff);
         char bufff[20]; sprintf(bufff, "  sw $v0, %d($fp)", $1->p->stkPos);emit(bufff);
+      }else if ($3.place == type_func){
+        char buf[20]; sprintf(buf, "  move $%d, $v0", insert_inRegister($1->p->id));emit(buf);
 
+      }else{
+        char buf[20]; sprintf(buf, "  sw $%d, %d($fp)", $3.place, $1->p->stkPos);emit(buf);
+        delete_inregister($3.place);
       }
     }else if($1->p->is_array == 1){
       char buff[20];
@@ -731,9 +733,15 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 		}
 	}
 	$$.nt_type = $1->p->return_type;	/*Function return type passed to factor.*/
-  $$.place = type_func;
-  if($1->p->id == "read" || $1->p->id == "write"){
+
+
+  if(!strcmp($1->p->id,"read") || !strcmp($1->p->id,"write")){
     $$.is_lib_func = 1;
+
+  }else{
+    $$.place = type_func;
+    char buf[20]; sprintf(buf,"  jal %s", $1->p->id);
+    emit(buf);
   }
 	printf("factor: return type of (%s) is: %d\n", $1->p->id, $$.nt_type);
 }

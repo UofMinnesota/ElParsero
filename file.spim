@@ -59,6 +59,7 @@ main:
   sw $15, 4($sp)
 
 _begin_main:
+  sw $0, -28($fp)
   li $10, 20
   li $11, 5
   sub $12, $10, $11 
@@ -81,20 +82,9 @@ test0:
   li $16, 1
   sne $8, $15, $16
   beqz $8, lelse0
-  sw $16, -40($fp)
+  jal ElFuegoQueArde
+  move $9, $v0
 lelse0:
-  li $v0, 4
-  la $a0, m1
-  syscall
-  li $v0, 4
-  la $a0, m2
-  syscall
-  li $v0, 5
-  syscall
-  sw $v0, -20($fp)
-  li $v0, 5
-  syscall
-  sw $v0, -28($fp)
 
 
 _end_main:
@@ -118,5 +108,3 @@ _globalint: .word 0
 _vector: .word 0, 0, 0, 0, 0
 _buceta2: .word 0, 0, 0, 0, 0, 0, 0, 0, 0
 _vector32: .word 0, 0, 0, 0, 0, 0, 0, 0
-m2: .asciiz "adios mundo malo"
-m1: .asciiz "hola mundo malo"

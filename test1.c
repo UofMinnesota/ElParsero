@@ -13,7 +13,7 @@ void ElFuegoQueArde()
 void main()
 {
   int localint, a;
-  int g, b;
+  int b, g = 0;
   int i, j;
   int localint2 = 20 - 5; /* error 1, redeclear localint */
   int vector[5];
@@ -23,13 +23,15 @@ void main()
   localint = globalint * 20 - 5;
   vector[2] = 200;
 
+
   if (globalint && localint < 2 && localint2 != 1){
-    localint2 = 1;
+    g = ElFuegoQueArde();
   }
 
-  write("hola mundo malo");
+  /*write("hola mundo malo");
   write("adios mundo malo");
   a = read();
-  b = read();
+  b = read();*/
+
   return;
 }
