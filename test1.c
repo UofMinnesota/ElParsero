@@ -18,7 +18,8 @@ void main()
   int localint, a;
   int b, g = 0;
   int i, j;
-  int localint2 = 20 - 5; /* error 1, redeclear localint */
+  int localint2 = 20 - 5; /* error 1,
+  redeclear localint */
   int vector[5];
   int buceta2[9];
   int vector32[8];

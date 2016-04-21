@@ -79,7 +79,8 @@ _begin_main:
   li $15, 5
   sub $16, $14, $15 
   sw $16, -40($fp)
-#/* TestCase 1: Variable Declarations */#/* error 1, redeclear localint */
+#/* error 1,
+#  redeclear localint */
   li $16, 100
   sw $16, _globalint
   li $16, 2

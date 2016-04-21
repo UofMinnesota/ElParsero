@@ -49,7 +49,24 @@ error    .
 %%
 
 {ws}            ;   /* do nothing with whitespace */
-{comment}	     {char cmm[708]; strcat(cmm, "#"); strcat(cmm, yytext);emit(cmm);}
+{comment}	     {char cmm[708];int x = 0;
+                for(x=0; x<708;x++) cmm[x] = 0;
+                strcat(cmm, "#"); strcat(cmm, yytext);
+                int hue = 0;
+
+                char enterado[930];
+                for(x=0; x<930;x++) enterado[x] = 0;
+                for(x=0; x<strlen(cmm); x++,hue++)
+                {
+                  enterado[hue] = cmm[x];
+                  if( cmm[x] == '\n')
+                  {
+                    enterado[++hue] = '#';
+                  }
+                }
+                emit(enterado);
+
+                }
 {kwInt}         {tokens++;return INT;}
 {kwFloat}       {tokens++;return FLOAT;}
 {kwVoid}	{tokens++;return VOID;}
