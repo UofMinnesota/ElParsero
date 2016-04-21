@@ -11,6 +11,7 @@ static int linenumber = 1;
 int cur_scope = 0;
 int is_nt_func = 0;
 int tmp_array_dim = 0;
+int last_array_num = 0;
 int ifnum = 0;
 int m = 1;
 int param_num = 0;
@@ -194,7 +195,7 @@ param		: type ID
 	{
 		$2->p->scope = 1;
     int aux = insert_inRegister($2->p->id);
-    char buf[20]; sprintf(buf, "  moves $%d, $a%d\n", aux, param_num++);//emit(buf);
+    char buf[20]; sprintf(buf, "  move $%d, $a%d\n", aux, param_num++);//emit(buf);
     //char* kth23 = "Hello";pt13lula
     //char dest[12];
 
@@ -497,6 +498,7 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
       char buf[20]; sprintf(buf, "  sw $%d, _%s($%d)", $3.place, $1->p->id, temp_place);
       emit(buf);
       delete_inregister($3.place);
+      delete_inregister(temp_place);
     }else{
 
       char buf[20]; sprintf(buf, "  sw $%d, _%s", $3.place, $1->p->id);emit(buf);
@@ -529,7 +531,7 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 		| RETURN relop_expr MK_SEMICOLON	/*Cross check return type.*/
 	{
 		fn_return_type = $2.nt_type;
-    char buf[20]; sprintf(buf, "  MOVE $v0, $%d", $2.place);emit(buf);
+    char buf[20]; sprintf(buf, "  move $v0, $%d", $2.place);emit(buf);
 	}
 		;
 
@@ -615,6 +617,10 @@ nonempty_relop_expr_list	: nonempty_relop_expr_list MK_COMMA relop_expr
       char buf[20];
       sprintf(buf, "  move $a%d, $%d", $1.func_list_num,insert_inRegister($3.name));
       emit(buf);
+    }else{
+      char buf[20];
+      sprintf(buf, "  move $a%d, $%d", $1.func_list_num, temp_place);
+      emit(buf);
     }
 		//printf("nonempty_relop_expr_list_1: name = %s, arg # = %d, array dim# = %d & %d.\n", $$.name, $$.func_list_num, $$.func_arg_type[1], $$.func_arg_type[2]);
 //Scalar or Pointer?
@@ -649,14 +655,18 @@ expr		: expr add_op term {temp_place = insert_inRegister($1.name);
                               char buf[20];
                              if(temp_place < 32){
                                sprintf(buf, "  %s $%d, $%d, $%d ", $2, temp_place, $1.place, $3.place);
+
                              }else{
                                if($2 == "add"){
                                  sprintf(buf, "  add.s $f%d, $f%d, $%d ", temp_place-32, $1.place-32, $3.place);
+
                                }else{
                                  sprintf(buf, "  sub.s $f%d, $f%d, $%d ", temp_place-32, $1.place-32, $3.place);
+
                                }
                              }
                              emit(buf);
+                             $$ = $1;
                              $$.place = temp_place; }
 		| term
 	{
@@ -730,6 +740,7 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
     }else{
       $1->place = insert_inRegister(na);
     }
+    //printf("id:%d place:%d\n ", $1->const_u.ival,$1->place);
     $$.place = $1->place;}		/*Checking Array subscript.*/
 	//{printf("ID: %d\n", $1->const_u.ival);}
 		/* | - constant, here - is an Unary operator */
@@ -781,9 +792,9 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 		| var_ref
 		/* | - var-reference */
 {
-
+  int prev_temp = temp_place;
   temp_place = find_inRegister($1->p->id);
-
+  //printf("%s: %d\n", $1->p->id, $1->p->is_array);
   if($1->p->scope == 0 && !temp_place){
     char buf[20];
     temp_place = insert_inRegister($1->p->id);
@@ -796,14 +807,33 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
     }
   }else if (!temp_place){
     char buf[20];
-    temp_place = insert_inRegister($1->p->id);
-    if(temp_place < 32){
-      sprintf(buf, "  lw $%d, %d($fp)", temp_place, $1->p->stkPos);
-      emit(buf);
+    if($1->p->is_array){
+      //printf("%d", last_array_num);
+      char buff[20];
+      sprintf(buff, "%s%d", $1->p->id, last_array_num);
+      temp_place = insert_inRegister(buff);
+      last_array_num++;
+      if(temp_place < 32){
+        sprintf(buf, "  lw $%d, %s($%d)", temp_place, $1->p->id, prev_temp);
+        emit(buf);
+        delete_inregister(prev_temp);
+      }else{
+        sprintf(buf, "  l.s $f%d, %s($%d)", temp_place-32, $1->p->id, prev_temp);
+        emit(buf);
+        delete_inregister(prev_temp);
+      }
+
     }else{
-      sprintf(buf, "  l.s $f%d, %d($fp)", temp_place-32, $1->p->stkPos);
-      emit(buf);
+      temp_place = insert_inRegister($1->p->id);
+      if(temp_place < 32){
+        sprintf(buf, "  lw $%d, %d($fp)", temp_place, $1->p->stkPos);
+        emit(buf);
+      }else{
+        sprintf(buf, "  l.s $f%d, %d($fp)", temp_place-32, $1->p->stkPos);
+        emit(buf);
+      }
     }
+
   }
   $$.place = temp_place;
 $$.nt_type = $1->p->type;			/*Type to be used in array subscript.*/
@@ -812,7 +842,7 @@ $$.nt_type = $1->p->type;			/*Type to be used in array subscript.*/
 //	printf("factor-var_ref: variable is = %s, tmp_array_dim = %d.\n", $1->p->id, tmp_array_dim);
 	if($1->p->is_array == 1) {	/*It's array.*/
 		if($1->p->array_dim != tmp_array_dim) {
-			printf("Incompatible array dimensions.\n");
+			printf("Incompatible array dimensions.%d:%d\n", $1->p->array_dim, tmp_array_dim);
 			error = 1;
 		}
 	}
@@ -844,10 +874,13 @@ var_ref		: ID
 dim		: MK_LB expr MK_RB
 	{
 		tmp_array_dim++;
+    //printf("dim_decl_1: expr = %s\n", $2.name); //miguel4
+
+
 
 		if($2.nt_type != type_int) {		/*Array dimension check in stmt.*/
 			printf("dim: Array subscript is not an integer.\n");
-//			printf("dim_decl_1: expr = %d\n", $2);
+
 			error = 1;
 		}
 	}
@@ -927,6 +960,7 @@ emit("\n.data");
 char buff[20];
 sprintf(buff,"_framesize_%s: .word 36", func);
 emit(buff);
+
 }
 
 int main (int argc, char *argv[])
@@ -1052,75 +1086,6 @@ char buf[200];
     fclose(f);
     return 0;
 } /* main */
-/*
-int main (int argc, char *argv[])
-{
-    init_symtab();
-    f = fopen("file.spim", "w");
-    printf("Symbol Table initialized\n");
-    emit(".text");
-    if(argc>0)
-        yyin = fopen(argv[1],"r");
-    else
-        yyin=stdin;
-
-    yyparse();
-    endMain();
-    //print_symtab();
-    if (error == 1)
-	printf("%s\n", "Parsing completed. Errors found.");
-    else{
-    	printf("%s\n", "Parsing completed. No errors found.");
-      emit("\n.data");
-      char buf[20];
-      ptr p;
-      int i, value = 0;
-      for(i=0;i<TABLESIZE;i++){
-          p=symtab[i];
-          while(p!=NULL){
-              if(p->type == type_int || p->type == type_float){
-                  sprintf(buf, "_%s: .word %d", p->id, value);
-                  emit(buf);
-              }
-
-              p=p->next;
-          }
-      }
-      sprintf(buf, "_framesize_main: .word 36", 2, 2);
-      emit(buf);
-
-    }
-//    print_symtab();
-    cleanup_symtab(-1); //clean up the entire symbol table
-/// funciona com 21 por motivos desconhecidos// 21 dividido por 3?
-    char bufArray[100];
-    int where = 0;
-    regist aux2 = arrays;
-    while(aux2!=NULL){
-
-        while(aux2->place>0){
-
-          bufArray[where] = '0';
-          if(aux2->place != 1){
-            bufArray[where+1] = ',';
-            bufArray[where+2] = ' ';
-            where+=3;
-          }
-
-          aux2->place--;
-        }
-        char buf[100];
-        sprintf(buf, "_%s: .word %s", aux2->name, bufArray);
-        printf("%s%s\n", "Shit reached here? 3 - ",aux2->name);
-        emit(buf);
-        aux2=aux2->next;
-    }
-    //print_registers();
-    //clear_inregister();
-    fclose(f);
-    return 0;
-} /* main */
-
 
 yyerror (char *mesg)
   {

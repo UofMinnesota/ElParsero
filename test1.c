@@ -2,13 +2,13 @@
 
 int globalint;
 
-int ElFuegoQueArde(int j, int i, int r)
+int ElFuegoQueArde(int j, int i, int r, int vec)
 {
 
   int b,x = j;
   b = 4 + r;
   b = 9 + j;
-  b = i+2;
+  b = i;
   return b;
 }
 
@@ -22,19 +22,15 @@ void main()
   int vector[5];
   int buceta2[9];
   int vector32[8];
+
   globalint = 100;
-  localint = globalint * 20 - 5;
   vector[2] = 200;
+  localint = globalint * 20 - 5;
 
+  globalint = vector[2];
 
-  if (globalint && localint < 2 && localint2 != 1){
-    g = ElFuegoQueArde(localint, localint2, g);
-  }
-
-  /*write("hola mundo malo");
-  write("adios mundo malo");
-  a = read();
-  b = read();*/
+  vector[1] = globalint;
+  g = ElFuegoQueArde(globalint,g, localint, g);
 
   return;
 }
