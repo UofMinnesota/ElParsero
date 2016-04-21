@@ -2,11 +2,13 @@
 
 int globalint;
 
-void ElFuegoQueArde()
+int ElFuegoQueArde(int j, int i, int r) 
 {
   int b,x = 0;
-  b = 3+2;
-  return;
+  b = 4 + r;
+  b = 9 + j;
+  b = i+2;
+  return b;
 }
 
 
@@ -25,7 +27,7 @@ void main()
 
 
   if (globalint && localint < 2 && localint2 != 1){
-    g = ElFuegoQueArde();
+    g = ElFuegoQueArde(localint, localint2, g);
   }
 
   /*write("hola mundo malo");

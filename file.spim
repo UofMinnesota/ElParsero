@@ -1,3 +1,6 @@
+  move $8, $a0 #esses 3 moves deveriam estar no inicio do begin_elfuego.
+  move $9, $a1
+  move $10, $a2
 
 .text
 ElFuegoQueArde:
@@ -18,10 +21,16 @@ ElFuegoQueArde:
 
 _begin_ElFuegoQueArde:
   sw $0, -12($fp)
-  li $8, 3
-  li $9, 2
-  add $10, $8, $9 
-  sw $10, -8($fp)
+  li $11, 4
+  add $12, $11, $10
+  sw $12, -8($fp)
+  li $12, 9
+  add $13, $12, $8
+  sw $13, -8($fp)
+  li $13, 2
+  add $9, $9, $13
+  sw $9, -8($fp)
+  lw $9, -8($fp)
 
 
 _end_ElFuegoQueArde:
@@ -60,28 +69,32 @@ main:
 
 _begin_main:
   sw $0, -28($fp)
-  li $10, 20
-  li $11, 5
-  sub $12, $10, $11 
-  sw $12, -40($fp)
-  li $12, 100
-  sw $12, _globalint
-  lw $12, _globalint
-  mul $12, $12, $10
-  sub $12, $12, $11 
-  sw $12, -16($fp)
-  li $12, 200
-  sw $12, _vector($12)
+  li $14, 20
+  li $15, 5
+  sub $16, $14, $15
+  sw $16, -40($fp)
+  li $16, 100
+  sw $16, _globalint
+  lw $16, _globalint
+  mul $16, $16, $14
+  sub $16, $16, $15
+  sw $16, -16($fp)
+  li $16, 200
+  sw $16, _vector($16)
 test0:
-  lw $12, _globalint
-  beqz $12, lelse0
-  lw $13, -16($fp)
-  slt $14, $13, $9
-  beqz $14, lelse0
-  lw $15, -40($fp)
-  li $16, 1
-  sne $8, $15, $16
-  beqz $8, lelse0
+  lw $16, _globalint
+  beqz $16, lelse0
+  lw $8, -16($fp)
+  slt $10, $8, $13
+  beqz $10, lelse0
+  lw $11, -40($fp)
+  li $12, 1
+  sne $13, $11, $12
+  beqz $13, lelse0
+  move $a0, $8
+  move $a1, $11
+  lw $9, -28($fp)
+  move $a2, $9
   jal ElFuegoQueArde
   move $9, $v0
 lelse0:

@@ -13,6 +13,7 @@ int is_nt_func = 0;
 int tmp_array_dim = 0;
 int ifnum = 0;
 int m = 1;
+int param_num = 0;
 int isif = 0;
 int ifnumbegin = 0;
 int allLabel[256];
@@ -114,11 +115,15 @@ global_decl_list: global_decl_list global_decl
 		;
 
 global_decl	: decl_list function_decl
-		| function_decl {}
+		| function_decl
     ;
 
+
+
 /*Vineeth: Scoping rule is not correct!*/
-function_decl	: type ID MK_LPAREN param_list MK_RPAREN MK_LBRACE {generateFuncio($2->p->id);cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} MK_RBRACE
+function_decl	: type ID MK_LPAREN param_list MK_RPAREN MK_LBRACE {param_num = 0;generateFuncio($2->p->id);cur_scope++;
+
+  } block {cleanup_symtab(cur_scope);cur_scope--;} MK_RBRACE
 	{
 //	printf("func_defn_x: %s, decl: %d, num: %d\n", $2->p->id, $2->p->arg_num, $4.func_list_num);
 	if(($1 != $2->p->return_type) && ($2->p->is_lib_func == 0) && ($2->p->type == type_func)) {	/*Comparing with declaration.*/
@@ -141,6 +146,7 @@ function_decl	: type ID MK_LPAREN param_list MK_RPAREN MK_LBRACE {generateFuncio
 
 	check_func_details($2, $4);
   endFuncio($2->p->id);
+
 	}
 //Vineeth: Function declarations. The above ones are function definitions
 		| type ID MK_LPAREN param_list MK_RPAREN MK_SEMICOLON /*Scope = 0 and populating function parameters*/
@@ -176,6 +182,7 @@ param_list	: param_list MK_COMMA param
 	{
 		$$.func_list_num = 1;
 		$$.func_arg_type[$$.func_list_num] = $1;	//Populating dimension for each function argument.
+
 //		printf("param_list_2: func_list_num = %d, func_arg_type = %d.\n", $$.func_list_num, $$.func_arg_type[$$.func_list_num]);
 	}
 		| {$$.func_list_num = 0;}		/*To avoid two productions for function decl and defn.*/
@@ -184,6 +191,8 @@ param_list	: param_list MK_COMMA param
 param		: type ID
 	{
 		$2->p->scope = 1;
+    int aux = insert_inRegister($2->p->id);
+    char buf[20]; sprintf(buf, "  move $%d, $a%d", aux, param_num++);emit(buf);
 		$2->p->type = $1;
 		$2->p->first_time = 0;
 //		printf("param: scope = 1 for ID %s\n", $2->p->id);
@@ -593,9 +602,16 @@ nonempty_relop_expr_list	: nonempty_relop_expr_list MK_COMMA relop_expr
 		$$.func_list_num = $1.func_list_num + 1;
 		$$.func_arg_type[$$.func_list_num] = $3.func_list_num;
 		strcpy($$.name, $3.name);
-		printf("nonempty_relop_expr_list_1: name = %s, arg # = %d, array dim# = %d & %d.\n", $$.name, $$.func_list_num, $$.func_arg_type[1], $$.func_arg_type[2]);
+    //printf("aqui:%s\n", $3.name);
+    if(find_inRegister($3.name) && $1.func_list_num <=4){
+      char buf[20];
+      sprintf(buf, "  move $a%d, $%d", $1.func_list_num,insert_inRegister($3.name));
+      emit(buf);
+    }
+		//printf("nonempty_relop_expr_list_1: name = %s, arg # = %d, array dim# = %d & %d.\n", $$.name, $$.func_list_num, $$.func_arg_type[1], $$.func_arg_type[2]);
 //Scalar or Pointer?
 /*
+
 		ptr p=lookup($3.name, 1);
 		if(p->array_dim == 0) {
 			if(p->array_dim != $3.func_list_num) {
@@ -608,6 +624,12 @@ nonempty_relop_expr_list	: nonempty_relop_expr_list MK_COMMA relop_expr
 	}
 		| relop_expr
 	{					/*For function parameter number?*/ //PROBLEM???
+    if(find_inRegister($1.name)){
+      char buf[20];
+      sprintf(buf, "  move $a0, $%d", insert_inRegister($1.name));
+      emit(buf);
+    }
+
 		$$.func_list_num = 1;
 		$$.func_arg_type[$$.func_list_num] = $1.func_list_num;
 		strcpy($$.name, $1.name);
