@@ -1,6 +1,4 @@
-  move $8, $a0 #esses 3 moves deveriam estar no inicio do begin_elfuego.
-  move $9, $a1
-  move $10, $a2
+#/* TestCase 1: Variable Declarations */
 
 .text
 ElFuegoQueArde:
@@ -20,17 +18,22 @@ ElFuegoQueArde:
   sw $15, 4($sp)
 
 _begin_ElFuegoQueArde:
-  sw $0, -12($fp)
-  li $11, 4
-  add $12, $11, $10
-  sw $12, -8($fp)
-  li $12, 9
-  add $13, $12, $8
+  moves $8, $a0
+  moves $9, $a1
+  moves $10, $a2
+  sw $8, -12($fp)
+  li $8, 4
+  add $11, $8, $10 
+  sw $11, -8($fp)
+  li $11, 9
+  lw $12, 0($fp)
+  add $13, $11, $12 
   sw $13, -8($fp)
   li $13, 2
-  add $9, $9, $13
+  add $9, $9, $13 
   sw $9, -8($fp)
   lw $9, -8($fp)
+  MOVE $v0, $9
 
 
 _end_ElFuegoQueArde:
@@ -68,35 +71,43 @@ main:
   sw $15, 4($sp)
 
 _begin_main:
+  moves $8, $a0
+  moves $9, $a1
+  moves $10, $a2
   sw $0, -28($fp)
   li $14, 20
   li $15, 5
-  sub $16, $14, $15
+  sub $16, $14, $15 
   sw $16, -40($fp)
+#/* error 1, redeclear localint */
   li $16, 100
   sw $16, _globalint
   lw $16, _globalint
   mul $16, $16, $14
-  sub $16, $16, $15
+  sub $16, $16, $15 
   sw $16, -16($fp)
   li $16, 200
   sw $16, _vector($16)
 test0:
   lw $16, _globalint
   beqz $16, lelse0
-  lw $8, -16($fp)
-  slt $10, $8, $13
-  beqz $10, lelse0
+  lw $10, -16($fp)
+  slt $8, $10, $13
+  beqz $8, lelse0
   lw $11, -40($fp)
   li $12, 1
   sne $13, $11, $12
   beqz $13, lelse0
-  move $a0, $8
+  move $a0, $10
   move $a1, $11
   lw $9, -28($fp)
   move $a2, $9
   jal ElFuegoQueArde
   move $9, $v0
+#/*write("hola mundo malo");
+  write("adios mundo malo");
+  a = read();
+  b = read();*/
 lelse0:
 
 

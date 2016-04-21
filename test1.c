@@ -2,9 +2,10 @@
 
 int globalint;
 
-int ElFuegoQueArde(int j, int i, int r) 
+int ElFuegoQueArde(int j, int i, int r)
 {
-  int b,x = 0;
+
+  int b,x = j;
   b = 4 + r;
   b = 9 + j;
   b = i+2;

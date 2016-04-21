@@ -19,6 +19,7 @@ int ifnumbegin = 0;
 int allLabel[256];
 int temp_place = 8;
 int fp_pos = 0;
+char pt13lula[666];
 enum all_type cur_type, fn_return_type;
 
 struct var_type{
@@ -53,6 +54,7 @@ struct f_l{	//To get details of function arguments.
 
 %token <variable> ID
 %token <con_pt> CONST
+%token <variable> COMMENT
 %token VOID
 %token INT
 %token FLOAT
@@ -192,7 +194,12 @@ param		: type ID
 	{
 		$2->p->scope = 1;
     int aux = insert_inRegister($2->p->id);
-    char buf[20]; sprintf(buf, "  move $%d, $a%d", aux, param_num++);emit(buf);
+    char buf[20]; sprintf(buf, "  moves $%d, $a%d\n", aux, param_num++);//emit(buf);
+    //char* kth23 = "Hello";pt13lula
+    //char dest[12];
+
+    //strcpy( dest, kth23 );
+    strcat( pt13lula, buf );
 		$2->p->type = $1;
 		$2->p->first_time = 0;
 //		printf("param: scope = 1 for ID %s\n", $2->p->id);
@@ -522,6 +529,7 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
 		| RETURN relop_expr MK_SEMICOLON	/*Cross check return type.*/
 	{
 		fn_return_type = $2.nt_type;
+    char buf[20]; sprintf(buf, "  MOVE $v0, $%d", $2.place);emit(buf);
 	}
 		;
 
@@ -852,9 +860,19 @@ struct_tail	: MK_DOT ID
 FILE *f;
 void generateFuncio(char *func)
 {
+  int x = 0;
+
   emit("\n.text");
 char buf[2000];
-sprintf(buf, "%s:\n%s\n%s\n%s\n%s\n%s%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n_begin_%s:",func,
+char laBuferizacionSeletiva[999];
+
+for(x=0; x < strlen(pt13lula) ; x++)
+{
+  if(strlen(pt13lula)-1 == x) break;
+  laBuferizacionSeletiva[x] = pt13lula[x];
+}
+
+sprintf(buf, "%s:\n%s\n%s\n%s\n%s\n%s%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n_begin_%s:\n%s",func,
 	"  sw $ra, 0($sp)",
 	"  sw $fp, -4($sp)",
 	"  add $fp, $sp, -4",
@@ -869,8 +887,14 @@ sprintf(buf, "%s:\n%s\n%s\n%s\n%s\n%s%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n_
 	"  sw $13, 12($sp)",
 	"  sw $14, 8($sp)",
 	"  sw $15, 4($sp)",
- func
+ func,
+ laBuferizacionSeletiva
 );
+
+for(x=0; x< sizeof(pt13lula); x++ )
+{
+  pt13lula[x]=0;
+}
 emit(buf);
 }
 

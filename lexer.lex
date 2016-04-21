@@ -49,7 +49,7 @@ error    .
 %%
 
 {ws}            ;   /* do nothing with whitespace */
-{comment}	;
+{comment}	     {char cmm[708]; strcat(cmm, "#"); strcat(cmm, yytext);emit(cmm);}
 {kwInt}         {tokens++;return INT;}
 {kwFloat}       {tokens++;return FLOAT;}
 {kwVoid}	{tokens++;return VOID;}
@@ -137,4 +137,3 @@ error    .
 {error}         return ERROR;
 
 %%
-
