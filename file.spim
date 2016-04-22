@@ -21,7 +21,7 @@ _begin_ElFuegoQueArde:
   move $8, $a0
   move $9, $a1
   move $10, $a2
-  move $11, $a3
+  move $11, $a3
   sw $8, -12($fp)
   li $8, 4
   add $12, $8, $10 
@@ -70,10 +70,7 @@ main:
   sw $15, 4($sp)
 
 _begin_main:
-  move $8, $a0
-  move $9, $a1
-  move $10, $a2
-  move $11, $a3
+
   sw $0, -28($fp)
   li $14, 20
   li $15, 5

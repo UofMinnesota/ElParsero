@@ -83,7 +83,7 @@ int ifnumbegin = 0;
 int allLabel[256];
 int temp_place = 8;
 int fp_pos = 0;
-char pt13lula[666];
+char pt13lula[665];
 enum all_type cur_type, fn_return_type;
 
 struct var_type{
@@ -2751,6 +2751,10 @@ sprintf(buf, "%s:\n%s\n%s\n%s\n%s\n%s%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n_
 for(x=0; x< sizeof(pt13lula); x++ )
 {
   pt13lula[x]=0;
+}
+for(x=0; x< sizeof(laBuferizacionSeletiva); x++ )
+{
+  laBuferizacionSeletiva[x]=0;
 }
 emit(buf);
 }
