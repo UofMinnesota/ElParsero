@@ -22,6 +22,7 @@ void main()
   int buceta2[9];
   int vector32[8];
   globalint = 100;
+  buceta2[1] = 2;
   localint = globalint * 20 - 5;
   vector[2] = 200;
 

@@ -70,7 +70,10 @@ main:
   sw $15, 4($sp)
 
 _begin_main:
-
+  move $8, $a0
+  move $9, $a1
+  move $10, $a2
+  move $11, $a3
   sw $0, -28($fp)
   li $14, 20
   li $15, 5
@@ -91,6 +94,8 @@ _begin_main:
   lw $16, vector($10)
   sw $16, _globalint
   li $10, 1
+  li $16, 3
+  sw $16, _vector2($10)
   lw $16, _globalint
   sw $16, _vector($16)
   lw $16, _globalint

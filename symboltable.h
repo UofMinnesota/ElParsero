@@ -8,7 +8,7 @@ struct node{			/* Structure for Identifiers */
         scope,  		//scope of the variable
         is_typedef, 		//true if the ID is a typedef name, not a variable
         first_time, 		//to differentiate between decl and subsequent use
-stkPos,
+        stkPos,
       arg_num,		/*# of Arguments in the function*/
 	is_lib_func,		/*Temp solution to handle main(), read(), fread() & write().*/
 	is_array,

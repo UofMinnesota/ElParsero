@@ -25,6 +25,7 @@ enum all_type cur_type, fn_return_type;
 
 struct var_type{
     ptr p;  		//pointer to symbol table entry
+    int arrayoffset;
 };
 struct const_type{
   int con_type;		/*0: Int, 1: Float, -1: String*/
@@ -42,6 +43,7 @@ struct f_l{	//To get details of function arguments.
     enum all_type nt_type;
     int place;
     int is_lib_func;
+    int arrayoffset;
 };
 %}
 
@@ -92,7 +94,7 @@ struct f_l{	//To get details of function arguments.
 %token RETURN
 
 %type <num> dim_fn dimfn1 param
-%type <func_list> param_list
+%type <func_list> param_list dim
 %type <func_list> relop_expr_list nonempty_relop_expr_list relop_expr relop_term relop_factor
 %type <func_list> expr term factor dim_decl cexpr mcexpr cfactor ifbegin whilebegin forbegin
 %type <nt_type> type
@@ -304,6 +306,8 @@ dim_decl	: MK_LB cexpr MK_RB
 	{
 //VM		$$ = $1 + 1;		/*Dimension count.*/
 		$$.func_list_num = $1.func_list_num + 1;					/*Argument count.*/
+    //printf("func_listnum:%d\n", $3.place);
+    $$.place = $1.place * $3.place;
 //		$$.func_arg_type[$$.func_list_num] = $$.func_arg_type[$$.func_list_num] + 1;	/*Dimension count.*/
 //VM		if($3 != type_int) {		/*Dimension type check.*/
 		if($3.nt_type != type_int) {		/*Dimension type check.*/
@@ -370,9 +374,9 @@ init_id		: ID
                       printf("float\n");
 */
 	$1->p->is_array = 1;
-//VM	$1->p->array_dim = $2;
+
 	$1->p->array_dim = $2.func_list_num;
-  //printf("%d", $2.place);
+  //printf("arraysize:%d\n", $2.place);
   insertArray($1->p->id, $2.place);
 	}
 		| ID OP_ASSIGN relop_expr
@@ -495,7 +499,8 @@ stmt		: MK_LBRACE {cur_scope++;} block {cleanup_symtab(cur_scope);cur_scope--;} 
       }
     }else if($1->p->is_array == 1){
       char buff[20];
-      char buf[20]; sprintf(buf, "  sw $%d, _%s($%d)", $3.place, $1->p->id, temp_place);
+      sprintf(buff, "%d", $1->arrayoffset);
+      char buf[20]; sprintf(buf, "  sw $%d, _%s($%d)", $3.place, $1->p->id, find_inRegister(buff));
       emit(buf);
       delete_inregister($3.place);
       delete_inregister(temp_place);
@@ -695,9 +700,17 @@ term		: term mul_op factor {temp_place = insert_inRegister($1.name);
                                   emit(buf);
                                 }
                               }
-                              $1.place = temp_place;}	//
-		| factor //comentei aqui{$$ = $1;}	/*For function return type?*/
-		{$$ = $1;}
+
+                              strcpy($$.name, $1.name);
+                              $$.place = temp_place;
+
+                              }	//
+		| factor
+		{$$ = $1;
+
+
+    strcpy($$.name, $1.name);
+    }
     ;
 
 mul_op		: OP_TIMES {$$ = "mul";}
@@ -710,7 +723,7 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
 /*Vineeth: OP_MINUS condition added as C could have a condition like:
  	"if(-(i < 10))".	*/
 		| OP_MINUS MK_LPAREN relop_expr MK_RPAREN	/*How to check Array subscript?*/
-		| CONST {$$.nt_type = $1->con_type;
+		| CONST {$$.nt_type = $1->con_type; $$.arrayoffset = $1->const_u.ival;
     char na[256];
     sprintf(na, "%d", $1->const_u.ival);
 
@@ -809,16 +822,20 @@ factor		: MK_LPAREN relop_expr MK_RPAREN		/*How to check Array subscript?*/
     char buf[20];
     if($1->p->is_array){
       //printf("%d", last_array_num);
+      char bufff[20];
+      sprintf(bufff, "%d", $1->arrayoffset);
+
       char buff[20];
-      sprintf(buff, "%s%d", $1->p->id, last_array_num);
+      sprintf(buff, "%s%d", $1->p->id, $1->arrayoffset);
+      printf("arrayoffset:%d\n", $1->arrayoffset);
       temp_place = insert_inRegister(buff);
-      last_array_num++;
+
       if(temp_place < 32){
-        sprintf(buf, "  lw $%d, %s($%d)", temp_place, $1->p->id, prev_temp);
+        sprintf(buf, "  lw $%d, _%s($%d)", temp_place, $1->p->id, find_inRegister(bufff));
         emit(buf);
         delete_inregister(prev_temp);
       }else{
-        sprintf(buf, "  l.s $f%d, %s($%d)", temp_place-32, $1->p->id, prev_temp);
+        sprintf(buf, "  l.s $f%d, _%s($%d)", temp_place-32, $1->p->id, find_inRegister(bufff));
         emit(buf);
         delete_inregister(prev_temp);
       }
@@ -864,7 +881,8 @@ var_ref		: ID
 		| var_ref dim		/*Array.*/
 {
 //	printf("var_ref: variable is = %s\n", $1->p->id);
-
+    //printf("dim_decl_1: expr = %d\n", $2.arrayoffset);
+    $$->arrayoffset = $2.arrayoffset;
 }
 
 		| var_ref struct_tail
@@ -874,9 +892,10 @@ var_ref		: ID
 dim		: MK_LB expr MK_RB
 	{
 		tmp_array_dim++;
-    //printf("dim_decl_1: expr = %s\n", $2.name); //miguel4
+    //
+    $$ = $2;
 
-
+    //printf("array:%d dim:%d \n", $2.arrayoffset, tmp_array_dim);
 
 		if($2.nt_type != type_int) {		/*Array dimension check in stmt.*/
 			printf("dim: Array subscript is not an integer.\n");
@@ -1020,63 +1039,36 @@ int main (int argc, char *argv[])
 
 
     }
-//    print_symtab();
-aux = arrays;
-while(aux!=NULL){
-  //printf("ok87-\n");
-  //prev = aux;
-    aux=(registr *)aux->next;
-}
+
     cleanup_symtab(-1); //clean up the entire symbol table
-    /////////Eu acho que isso tá bem errado<<<<<<< aumentei para 2000 e parou o seg fault
 
     aux = arrays;
-    while(aux!=NULL){
-      //printf("ok87\n");
-      //prev = aux;
-        aux=(registr *)aux->next;
-    }
-    aux = arrays;
-    //printf("%s\n", "Shit reached here");
+
     while(aux!=NULL /*&& arrCont-- !=0*/){ ////Não vai querer remover isso bernardo
-      ///////////// --------- CONTADOR ACIMA
-      int oxo = 100;
+
+      int oxo = 1000;
       char bufArray[oxo];
       for(; oxo>=0; oxo--)
       {
         bufArray[oxo] = 0;
       }
       int where = 0;
-        int x = aux->place;
-        //printf("%s - %d\n", "Shit reached here! dim:", x);
-        while(x>0){
-          //printf("%s - %d\n", "added! dim:", x);
-          bufArray[where] = '0';
-          if(x != 1){
-            bufArray[where+1] = ',';
-            bufArray[where+2] = ' ';
-            where+=3;
-          }
-
-          x--;
+      int x = aux->place;
+      while(x>0){
+        bufArray[where] = '0';
+        if(x != 1){
+          bufArray[where+1] = ',';
+          bufArray[where+2] = ' ';
+          where+=3;
         }
-          //printf("%s%s\n", "Shit reached here? 1 - ",aux->name);
-char buf[200];
-        sprintf(buf, "_%s: .word %s", aux->name, bufArray);  ///essa funcao tá fudendo tudo
-          //printf("%s%s\n", "Shit reached here? 2 - ",aux->name);
-        emit(buf);
-        //printf("%s%s\n", "Shit reached here? 3 - ",aux->name);
-        //aux->next = NULL;  // /works with this M<<<<<<<<<<<<<<<<<<<<<<
-        //if(aux != NULL && ((aux->next))!=NULL)
-        //if(aux->next)
-        //if(aux->flago == 0)
-        {
-          //printf("%s\n", "Shit got inside...");
-
-          aux=aux->next;
-        }
-        //printf("%s\n", "Shit reached");
+        x--;
+      }
+      char buf[2000];
+      sprintf(buf, "_%s: .word %s", aux->name, bufArray);
+      emit(buf);
+      aux=aux->next;
     }
+
     char buf[20];
     m--;
     while(m > 0){
